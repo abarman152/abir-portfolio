@@ -149,6 +149,41 @@ async function main() {
     });
   }
 
+  // Certifications
+  const certsExist = await prisma.certification.count();
+  if (!certsExist) {
+    await prisma.certification.createMany({
+      data: [
+        {
+          title: 'Oracle Cloud Infrastructure 2025 Certified AI Foundations Associate',
+          issuer: 'Oracle',
+          issueDate: new Date('2026-02-01'),
+          credentialId: '103400391OCI25AICFA',
+          credentialUrl: '',
+          imageUrl: '',
+          category: 'Cloud & AI',
+          description: 'Foundational certification covering AI concepts, machine learning fundamentals, and OCI AI services.',
+          tags: ['Oracle', 'Cloud', 'AI', 'Machine Learning'],
+          featured: true,
+          visible: true,
+        },
+        {
+          title: 'Generative AI Mastermind Program',
+          issuer: 'Outskill',
+          issueDate: new Date('2026-01-01'),
+          credentialId: '',
+          credentialUrl: '',
+          imageUrl: '',
+          category: 'AI / Generative AI',
+          description: 'Completed an advanced program focused on Generative AI concepts and real-world applications. Gained hands-on exposure to modern AI tools, model workflows, and practical implementation strategies. Mentored by Vaibhav Sisinty.',
+          tags: ['Generative AI', 'LLMs', 'AI Systems'],
+          featured: false,
+          visible: true,
+        },
+      ],
+    });
+  }
+
   // Sample research papers
   const researchExist = await prisma.researchPaper.count();
   if (!researchExist) {
