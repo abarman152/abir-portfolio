@@ -4,10 +4,14 @@ import { ArrowLeft, GitFork, ExternalLink, Calendar } from 'lucide-react';
 import type { Project } from '@/lib/types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const PROJECT_FETCH_TIMEOUT_MS = 5000;
 
 async function getProject(slug: string): Promise<Project | null> {
   try {
-    const res = await fetch(`${API}/projects/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API}/projects/${slug}`, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(PROJECT_FETCH_TIMEOUT_MS),
+    });
     if (!res.ok) return null;
     return res.json();
   } catch {

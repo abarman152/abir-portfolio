@@ -15,10 +15,14 @@ import type {
 } from '@/lib/types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const BUILD_FETCH_TIMEOUT_MS = 5000;
 
 async function fetchData<T>(path: string, fallback: T): Promise<T> {
   try {
-    const res = await fetch(`${API}${path}`, { next: { revalidate: 60 }, cache: 'no-store' });
+    const res = await fetch(`${API}${path}`, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(BUILD_FETCH_TIMEOUT_MS),
+    });
     if (!res.ok) return fallback;
     return res.json();
   } catch {
