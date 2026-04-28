@@ -15,12 +15,14 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 router.put('/:id', authenticate, async (req, res) => {
-  const link = await prisma.socialLink.update({ where: { id: req.params.id }, data: req.body });
+  const id = req.params.id as string;
+  const link = await prisma.socialLink.update({ where: { id }, data: req.body });
   res.json(link);
 });
 
 router.delete('/:id', authenticate, async (req, res) => {
-  await prisma.socialLink.delete({ where: { id: req.params.id } });
+  const id = req.params.id as string;
+  await prisma.socialLink.delete({ where: { id } });
   res.json({ message: 'Deleted' });
 });
 

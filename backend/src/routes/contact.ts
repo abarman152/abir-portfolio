@@ -19,12 +19,14 @@ router.get('/', authenticate, async (_, res) => {
 });
 
 router.patch('/:id/read', authenticate, async (req, res) => {
-  const msg = await prisma.contactMessage.update({ where: { id: req.params.id }, data: { read: true } });
+  const id = req.params.id as string;
+  const msg = await prisma.contactMessage.update({ where: { id }, data: { read: true } });
   res.json(msg);
 });
 
 router.delete('/:id', authenticate, async (req, res) => {
-  await prisma.contactMessage.delete({ where: { id: req.params.id } });
+  const id = req.params.id as string;
+  await prisma.contactMessage.delete({ where: { id } });
   res.json({ message: 'Deleted' });
 });
 

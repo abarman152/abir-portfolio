@@ -10,7 +10,8 @@ router.get('/', async (_, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const paper = await prisma.researchPaper.findUnique({ where: { id: req.params.id } });
+  const id = req.params.id as string;
+  const paper = await prisma.researchPaper.findUnique({ where: { id } });
   if (!paper) return res.status(404).json({ error: 'Not found' });
   res.json(paper);
 });
@@ -21,12 +22,14 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 router.put('/:id', authenticate, async (req, res) => {
-  const paper = await prisma.researchPaper.update({ where: { id: req.params.id }, data: req.body });
+  const id = req.params.id as string;
+  const paper = await prisma.researchPaper.update({ where: { id }, data: req.body });
   res.json(paper);
 });
 
 router.delete('/:id', authenticate, async (req, res) => {
-  await prisma.researchPaper.delete({ where: { id: req.params.id } });
+  const id = req.params.id as string;
+  await prisma.researchPaper.delete({ where: { id } });
   res.json({ message: 'Deleted' });
 });
 

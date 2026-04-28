@@ -15,12 +15,14 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 router.put('/:id', authenticate, async (req, res) => {
-  const skill = await prisma.skill.update({ where: { id: req.params.id }, data: req.body });
+  const id = req.params.id as string;
+  const skill = await prisma.skill.update({ where: { id }, data: req.body });
   res.json(skill);
 });
 
 router.delete('/:id', authenticate, async (req, res) => {
-  await prisma.skill.delete({ where: { id: req.params.id } });
+  const id = req.params.id as string;
+  await prisma.skill.delete({ where: { id } });
   res.json({ message: 'Deleted' });
 });
 
