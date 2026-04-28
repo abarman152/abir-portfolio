@@ -1,0 +1,14 @@
+{
+  "name": "abir-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "db:push": "cd backend && npm run db:push",
+    "db:seed": "cd backend && npm run db:seed",
+    "db:studio": "cd backend && npm run db:studio"
+  }
+}

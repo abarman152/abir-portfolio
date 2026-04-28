@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model HeroContent {
+  id        String   @id @default(cuid())
+  name      String   @default("Abir Barman")
+  tagline   String   @default("Data Scientist & Full Stack Developer")
+  roles     String[] @default(["Data Scientist", "ML Engineer", "Full Stack Developer", "Researcher"])
+  bio       String   @default("")
+  resumeUrl String   @default("")
+  avatarUrl String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String
+  url       String
+  username  String   @default("")
+  icon      String   @default("")
+  order     Int      @default(0)
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  longDesc    String   @default("")
+  techStack   String[]
+  imageUrl    String   @default("")
+  screenshots String[]
+  githubUrl   String   @default("")
+  liveUrl     String   @default("")
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ResearchPaper {
+  id        String   @id @default(cuid())
+  title     String
+  abstract  String
+  authors   String[]
+  journal   String   @default("")
+  year      Int
+  doi       String   @default("")
+  paperUrl  String   @default("")
+  tags      String[]
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Certification {
+  id            String    @id @default(cuid())
+  title         String
+  issuer        String
+  issueDate     DateTime
+  expiryDate    DateTime?
+  credentialId  String    @default("")
+  credentialUrl String    @default("")
+  imageUrl      String    @default("")
+  category      String    @default("General")
+  description   String    @default("")
+  tags          String[]  @default([])
+  featured      Boolean   @default(false)
+  visible       Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  date        DateTime
+  issuer      String   @default("")
+  imageUrl    String   @default("")
+  type        String   @default("Award")
+  tags        String[] @default([])
+  featured    Boolean  @default(false)
+  visible     Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model Skill {
+  id       String @id @default(cuid())
+  name     String
+  level    Int    @default(80)
+  category String
+  icon     String @default("")
+  order    Int    @default(0)
+}
+
+model Stat {
+  id     String @id @default(cuid())
+  label  String
+  value  Int    @default(0)
+  suffix String @default("")
+  icon   String @default("")
+  order  Int    @default(0)
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  id           String @id @default(cuid())
+  defaultTheme String @default("dark")
+  accentColor  String @default("#6366f1")
+  metaTitle    String @default("Abir Barman | Data Scientist")
+  metaDesc     String @default("Portfolio of Abir Barman - Data Scientist & Full Stack Developer")
+  ogImageUrl   String @default("")
+}
