@@ -71,10 +71,10 @@ export default function Stats({ stats }: { stats: Stat[] }) {
             return (
               <motion.div
                 key={stat.id}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
+                transition={{ duration: 0.4, delay: i * 0.09, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
                 style={{
                   padding: '2rem 1.75rem',
                   background: 'var(--bg-card)',

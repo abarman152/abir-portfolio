@@ -103,9 +103,19 @@ a:hover { opacity: 0.8; }
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color 0.22s cubic-bezier(0.25,0.46,0.45,0.94),
+              transform   0.22s cubic-bezier(0.25,0.46,0.45,0.94),
+              box-shadow  0.22s cubic-bezier(0.25,0.46,0.45,0.94);
+  will-change: transform;
 }
-.card:hover { border-color: var(--border-2); }
+.card:hover {
+  border-color: var(--border-2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+}
+[data-theme="dark"] .card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.30);
+}
 
 /* ─── Mono tag ───────────────────────────────────────────── */
 .tag {
@@ -118,7 +128,11 @@ a:hover { opacity: 0.8; }
   border: 1px solid var(--border);
   color: var(--text-2);
   display: inline-block;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.tag:hover {
+  border-color: var(--border-2);
+  color: var(--text);
 }
 
 /* ─── Button ─────────────────────────────────────────────── */
@@ -128,9 +142,11 @@ a:hover { opacity: 0.8; }
   font-size: 0.875rem; font-weight: 600; font-family: var(--font-sans);
   border-radius: 8px; border: none; cursor: pointer;
   background: var(--accent); color: #fff;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94);
+  will-change: transform;
 }
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:hover  { opacity: 0.88; transform: translateY(-1px) scale(1.01); }
+.btn-primary:active { opacity: 1;    transform: scale(0.97); }
 
 .btn-ghost {
   display: inline-flex; align-items: center; gap: 0.5rem;
@@ -139,9 +155,17 @@ a:hover { opacity: 0.8; }
   border-radius: 8px; cursor: pointer;
   background: transparent; color: var(--text-2);
   border: 1px solid var(--border);
-  transition: border-color 0.15s, color 0.15s, transform 0.15s;
+  transition: border-color 0.18s ease, color 0.18s ease,
+              transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94);
+  will-change: transform;
 }
-.btn-ghost:hover { border-color: var(--border-2); color: var(--text); transform: translateY(-1px); }
+.btn-ghost:hover  { border-color: var(--border-2); color: var(--text); transform: translateY(-1px); }
+.btn-ghost:active { transform: scale(0.97); }
+
+/* ─── Interactive anchor (CTA links using inline styles) ── */
+a[href]:not([href^="#"]):not([href^="mailto"]):not([href^="tel"]) {
+  -webkit-tap-highlight-color: transparent;
+}
 
 /* ─── Divider ────────────────────────────────────────────── */
 .divider { height: 1px; background: var(--border); }

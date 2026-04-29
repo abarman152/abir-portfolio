@@ -89,10 +89,11 @@ export default function Hero({ hero, socials }: Props) {
   const resolveIcon = (s: SocialLink): React.ElementType =>
     SOCIAL_ICON[s.platform] || SOCIAL_ICON[s.icon] || GitHubIcon;
 
+  const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
   const item = (delay: number) => ({
-    initial: { opacity: 0, y: 18 },
+    initial: { opacity: 0, y: 14 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, delay },
+    transition: { duration: 0.45, delay, ease: EASE },
   });
 
   return (

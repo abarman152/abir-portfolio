@@ -1,5 +1,7 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 const NAV_LINKS = [
   { href: '#about',          label: 'About' },
   { href: '#projects',       label: 'Projects' },
@@ -51,7 +53,13 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <footer style={{ background: 'var(--bg-2)', borderTop: '1px solid var(--border)' }}>
+    <motion.footer
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
+      style={{ background: 'var(--bg-2)', borderTop: '1px solid var(--border)' }}
+    >
       {/* Main footer body */}
       <div style={{
         maxWidth: '1200px', margin: '0 auto',
@@ -158,6 +166,6 @@ export default function Footer() {
           }
         }
       `}</style>
-    </footer>
+    </motion.footer>
   );
 }

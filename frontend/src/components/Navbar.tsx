@@ -88,30 +88,45 @@ export default function Navbar() {
         >
           {navLinks.map((link) => {
             const active = isActive(link.href);
-            const linkStyle: React.CSSProperties = {
+            const baseStyle: React.CSSProperties = {
+              position: 'relative',
               padding: '0.35rem 0.7rem',
               borderRadius: '7px',
               fontSize: '0.825rem',
               fontWeight: active ? 600 : 400,
               color: active ? 'var(--text)' : 'var(--text-2)',
-              background: active ? 'var(--bg-3)' : 'transparent',
+              background: 'transparent',
               textDecoration: 'none',
-              transition: 'color 0.15s, background 0.15s',
+              transition: 'color 0.18s ease',
               whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
             };
+            const pill = active ? (
+              <motion.span
+                layoutId="nav-pill"
+                style={{
+                  position: 'absolute', inset: 0,
+                  borderRadius: '7px',
+                  background: 'var(--bg-3)',
+                  zIndex: -1,
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
+              />
+            ) : null;
             return link.href.startsWith('/') && !link.href.startsWith('/#') ? (
-              <Link key={link.href} href={link.href} style={linkStyle}
+              <Link key={link.href} href={link.href} style={baseStyle}
                 onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
                 onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; }}
               >
-                {link.label}
+                {pill}{link.label}
               </Link>
             ) : (
-              <a key={link.href} href={link.href} style={linkStyle}
+              <a key={link.href} href={link.href} style={baseStyle}
                 onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
                 onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; }}
               >
-                {link.label}
+                {pill}{link.label}
               </a>
             );
           })}

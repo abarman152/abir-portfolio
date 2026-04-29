@@ -19,11 +19,12 @@ interface Props {
   achievements: Achievement[];
 }
 
+const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 14 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
-  transition: { duration: 0.45, delay },
+  transition: { duration: 0.45, delay, ease: EASE },
 });
 
 const SECTION_LABEL: React.CSSProperties = {
