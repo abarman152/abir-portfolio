@@ -50,17 +50,35 @@ export interface ProjectsResponse {
   totalPages: number;
 }
 
-export interface ResearchPaper {
+export interface ResearchAuthor {
+  name: string;
+  role?: string;
+  isPrimary?: boolean;
+}
+
+export interface Research {
   id: string;
+  slug: string;
   title: string;
   abstract: string;
-  authors: string[];
-  journal: string;
-  year: number;
-  doi: string;
-  paperUrl: string;
+  overviewMd: string;
+  authors: ResearchAuthor[];
+  publishedAt: string;
+  publisher: string;
+  publicationUrl: string;
+  googleScholarUrl: string;
   tags: string[];
   featured: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResearchListResponse {
+  items: Research[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 export interface Certification {

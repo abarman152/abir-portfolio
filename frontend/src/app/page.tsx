@@ -10,7 +10,7 @@ import Achievements from '@/components/sections/Achievements';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/Footer';
 import type {
-  HeroContent, SocialLink, Project, ResearchPaper,
+  HeroContent, SocialLink, Project, Research as ResearchItem,
   Certification, Achievement, Skill, Stat,
 } from '@/lib/types';
 
@@ -80,7 +80,7 @@ export default async function HomePage() {
     fetchData<HeroContent>('/hero', DEFAULT_HERO),
     fetchData<SocialLink[]>('/social', []),
     fetchData<Project[]>('/projects/featured', []),
-    fetchData<ResearchPaper[]>('/research', []),
+    fetchData<ResearchItem[]>('/research/featured', []),
     fetchData<Skill[]>('/skills', []),
     fetchData<Certification[]>('/certifications', DEFAULT_CERTS),
     fetchData<Achievement[]>('/achievements', []),
