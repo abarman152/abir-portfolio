@@ -35,16 +35,22 @@ export default function Modal({ open, onClose, title, children, onSubmit, submit
             }}
           />
 
-          {/* Modal panel */}
+          {/* Centering shell — static, never animated */}
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 201,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem',
+            pointerEvents: 'none',
+          }}>
+          {/* Modal panel — animated independently */}
           <motion.div
             initial={{ opacity: 0, scale: 0.97, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 12 }}
             transition={{ duration: 0.22, ease: EASE }}
             style={{
-              position: 'fixed', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 201, width: 'calc(100% - 2rem)', maxWidth: '540px',
+              pointerEvents: 'auto',
+              width: '100%', maxWidth: '540px',
               maxHeight: '90vh', overflowY: 'auto',
               borderRadius: '18px',
               background: 'var(--bg-card)',
@@ -117,6 +123,7 @@ export default function Modal({ open, onClose, title, children, onSubmit, submit
               </div>
             </form>
           </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
