@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, ExternalLink, Calendar, Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -10,26 +9,16 @@ import type { Certification } from '@/lib/types';
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
 function CertCard({ cert }: { cert: Certification }) {
-  const router = useRouter();
   const hasSlug = !!cert.slug;
   const href    = hasSlug ? `/certifications/${cert.slug}` : null;
 
-  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('a, button')) return;
-    if (href) router.push(href);
-  };
-
-  return (
+  const cardContent = (
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.25, ease: EASE }}
       className="card"
-      onClick={handleCardClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' && href) router.push(href); }}
-      tabIndex={href ? 0 : undefined}
-      role={href ? 'article' : undefined}
-      aria-label={href ? `${cert.title} — view credential` : undefined}
+      tabIndex={href ? -1 : undefined}
       style={{
         padding: '1.25rem', overflow: 'hidden', position: 'relative',
         cursor: href ? 'pointer' : 'default', outline: 'none',
@@ -115,7 +104,8 @@ function CertCard({ cert }: { cert: Certification }) {
               href={cert.credentialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'var(--text-3)', transition: 'color 0.15s' }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ color: 'var(--text-3)', transition: 'color 0.15s', position: 'relative', zIndex: 1 }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--accent)')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}
               title="View Credential"
@@ -124,20 +114,30 @@ function CertCard({ cert }: { cert: Certification }) {
             </a>
           )}
           {href && (
-            <Link
-              href={href}
+            <span
               style={{ color: 'var(--text-3)', transition: 'color 0.15s', display: 'flex', alignItems: 'center' }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--accent)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}
-              title="View Details"
             >
               <ArrowRight size={13} />
-            </Link>
+            </span>
           )}
         </div>
       </div>
     </motion.div>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block', outline: 'none' }}
+        aria-label={`${cert.title} — view credential`}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }
 
 export default function Certifications({ certs }: { certs: Certification[] }) {
