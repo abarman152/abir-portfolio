@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 const navLinks = [
   { href: '/',               label: 'Home' },
   { href: '/about',          label: 'About' },
-  { href: '/#projects',      label: 'Projects' },
+  { href: '/projects',       label: 'Projects' },
   { href: '/#research',      label: 'Research' },
   { href: '/#certifications', label: 'Certifications' },
   { href: '/#achievements',  label: 'Achievements' },
@@ -42,7 +42,8 @@ export default function Navbar() {
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/' && activeSection === '';
-    if (href === '/about') return pathname === '/about';
+    if (href === '/about') return pathname.startsWith('/about');
+    if (href === '/projects') return pathname.startsWith('/projects');
     if (href.startsWith('/#')) return pathname === '/' && activeSection === href.slice(2);
     return false;
   };

@@ -213,3 +213,61 @@ a[href]:not([href^="#"]):not([href^="mailto"]):not([href^="tel"]) {
   .about-secondary-photo { display: none !important; }
   .about-skill-row      { grid-template-columns: 1fr !important; }
 }
+
+/* ─── About page contact icon buttons ───────────────────── */
+.about-contact-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  text-decoration: none;
+  transition: transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94),
+              border-color 0.15s,
+              color 0.15s,
+              background 0.15s;
+  will-change: transform;
+}
+.about-contact-icon:hover {
+  transform: scale(1.08);
+  border-color: var(--border-2);
+  color: var(--accent);
+  background: var(--bg-card);
+}
+.about-contact-tooltip {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  z-index: 10;
+}
+.about-contact-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--border-2);
+}
+.about-contact-icon:hover .about-contact-tooltip {
+  opacity: 1;
+}

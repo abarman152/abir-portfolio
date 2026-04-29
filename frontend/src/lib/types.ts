@@ -24,14 +24,25 @@ export interface Project {
   title: string;
   description: string;
   longDesc: string;
+  problem: string;
+  result: string;
   techStack: string[];
   imageUrl: string;
   screenshots: string[];
   githubUrl: string;
   liveUrl: string;
   featured: boolean;
+  isPublished: boolean;
+  date: string;
   order: number;
   createdAt: string;
+}
+
+export interface ProjectsResponse {
+  projects: Project[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 export interface ResearchPaper {

@@ -134,45 +134,23 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
                 ))}
               </motion.div>
 
-              {/* Contact chips */}
+              {/* Social icon row */}
               <motion.div
                 {...fadeUp(0.24)}
-                style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}
+                style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}
               >
-                {socialLinks.map(({ icon: Icon, label: text, href }, i) => (
-                  <span
+                {socialLinks.map(({ icon: Icon, label, href }, i) => (
+                  <a
                     key={i}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                      padding: '0.45rem 1rem',
-                      borderRadius: '8px',
-                      background: 'var(--bg-3)',
-                      border: '1px solid var(--border)',
-                      fontSize: '0.8rem',
-                      color: 'var(--text-2)',
-                      transition: 'border-color 0.15s, color 0.15s',
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)';
-                      (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-                      (e.currentTarget as HTMLElement).style.color = 'var(--text-2)';
-                    }}
+                    href={href}
+                    target={href.startsWith('http') ? '_blank' : undefined}
+                    rel="noopener noreferrer"
+                    className="about-contact-icon"
+                    aria-label={label}
                   >
-                    <Icon size={13} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    {href ? (
-                      <a
-                        href={href}
-                        target={href.startsWith('http') ? '_blank' : undefined}
-                        rel="noopener noreferrer"
-                        style={{ color: 'inherit', textDecoration: 'none' }}
-                      >
-                        {text}
-                      </a>
-                    ) : text}
-                  </span>
+                    <Icon size={18} />
+                    <span className="about-contact-tooltip">{label}</span>
+                  </a>
                 ))}
               </motion.div>
             </div>

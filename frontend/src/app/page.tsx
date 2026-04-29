@@ -79,7 +79,7 @@ export default async function HomePage() {
   const [hero, socials, projects, papers, skills, certs, achievements, stats] = await Promise.all([
     fetchData<HeroContent>('/hero', DEFAULT_HERO),
     fetchData<SocialLink[]>('/social', []),
-    fetchData<Project[]>('/projects', []),
+    fetchData<Project[]>('/projects/featured', []),
     fetchData<ResearchPaper[]>('/research', []),
     fetchData<Skill[]>('/skills', []),
     fetchData<Certification[]>('/certifications', DEFAULT_CERTS),
