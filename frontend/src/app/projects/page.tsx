@@ -65,8 +65,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         )}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: 'auto' }}>
-          {project.techStack.slice(0, 5).map((t) => <span key={t} className="tag">{t}</span>)}
-          {project.techStack.length > 5 && <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', padding: '0.2rem 0.35rem' }}>+{project.techStack.length - 5}</span>}
+          {(project.techStack ?? []).slice(0, 5).map((t) => <span key={t} className="tag">{t}</span>)}
+          {(project.techStack ?? []).length > 5 && <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', padding: '0.2rem 0.35rem' }}>+{(project.techStack ?? []).length - 5}</span>}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
@@ -108,8 +108,10 @@ export default function ProjectsPage() {
       try {
         const res = await fetch(`${API}/projects?limit=200`, { cache: 'no-store' });
         if (!res.ok) throw new Error();
-        const data: ProjectsResponse = await res.json();
-        setAllProjects(data.projects);
+        const json = await res.json();
+        // Handle both response shapes: direct array (old) and {projects:[]} (new)
+        const list: Project[] = Array.isArray(json) ? json : (json.projects ?? []);
+        setAllProjects(list);
       } catch {
         setAllProjects([]);
       } finally {
@@ -120,24 +122,26 @@ export default function ProjectsPage() {
 
   // All unique tech tags for filter chips
   const allTechs = useMemo(() => {
+    if (!allProjects?.length) return [];
     const set = new Set<string>();
-    allProjects.forEach((p) => p.techStack.forEach((t) => set.add(t)));
+    allProjects.forEach((p) => (p.techStack ?? []).forEach((t) => set.add(t)));
     return Array.from(set).sort();
   }, [allProjects]);
 
   // Client-side filter + search + sort
   const filtered = useMemo(() => {
+    if (!allProjects?.length) return [];
     let list = [...allProjects];
     if (featured) list = list.filter((p) => p.featured);
-    if (techFilter.length > 0) list = list.filter((p) => techFilter.every((t) => p.techStack.includes(t)));
+    if (techFilter.length > 0) list = list.filter((p) => techFilter.every((t) => (p.techStack ?? []).includes(t)));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.problem.toLowerCase().includes(q) ||
-        p.result.toLowerCase().includes(q) ||
-        p.techStack.some((t) => t.toLowerCase().includes(q))
+        (p.title        ?? '').toLowerCase().includes(q) ||
+        (p.description  ?? '').toLowerCase().includes(q) ||
+        (p.problem      ?? '').toLowerCase().includes(q) ||
+        (p.result       ?? '').toLowerCase().includes(q) ||
+        (p.techStack ?? []).some((t) => t.toLowerCase().includes(q))
       );
     }
     if (sort === 'oldest') list.reverse();

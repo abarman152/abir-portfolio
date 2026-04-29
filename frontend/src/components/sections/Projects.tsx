@@ -61,12 +61,12 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
         {/* Tech stack */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: 'auto' }}>
-          {project.techStack.slice(0, 5).map((tech) => (
+          {(project.techStack ?? []).slice(0, 5).map((tech) => (
             <span key={tech} className="tag">{tech}</span>
           ))}
-          {project.techStack.length > 5 && (
+          {(project.techStack ?? []).length > 5 && (
             <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', padding: '0.22rem 0.4rem', alignSelf: 'center' }}>
-              +{project.techStack.length - 5}
+              +{(project.techStack ?? []).length - 5}
             </span>
           )}
         </div>
