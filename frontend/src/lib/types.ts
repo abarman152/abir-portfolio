@@ -114,6 +114,8 @@ export interface AboutProfile {
   email: string;
   linkedinUrl: string;
   githubUrl: string;
+  leetcodeUrl: string;
+  codechefUrl: string;
   location: string;
   primaryPhoto: string;
   secondaryPhoto: string;

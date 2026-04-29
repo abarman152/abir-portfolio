@@ -192,6 +192,14 @@ export default function AdminAbout() {
                   </FormField>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
+                  <FormField label="LeetCode URL">
+                    <input style={inputCss} value={profile.leetcodeUrl || ''} onChange={e => setProfile({ ...profile, leetcodeUrl: e.target.value })} placeholder="https://leetcode.com/u/..." />
+                  </FormField>
+                  <FormField label="CodeChef URL">
+                    <input style={inputCss} value={profile.codechefUrl || ''} onChange={e => setProfile({ ...profile, codechefUrl: e.target.value })} placeholder="https://codechef.com/users/..." />
+                  </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
                   <FormField label="Location">
                     <input style={inputCss} value={profile.location || ''} onChange={e => setProfile({ ...profile, location: e.target.value })} />
                   </FormField>

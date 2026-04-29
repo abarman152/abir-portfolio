@@ -30,6 +30,8 @@ const DEFAULT_PROFILE: AboutProfile = {
   email: 'abirbarman@proton.me',
   linkedinUrl: 'https://linkedin.com/in/abir-barman',
   githubUrl: 'https://github.com/abirbarman',
+  leetcodeUrl: 'https://leetcode.com/u/abirbarman/',
+  codechefUrl: 'https://www.codechef.com/users/abirbarman',
   location: 'India',
   primaryPhoto: '',
   secondaryPhoto: '',
