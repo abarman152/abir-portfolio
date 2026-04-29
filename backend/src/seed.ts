@@ -116,34 +116,32 @@ async function main() {
     });
   }
 
-  // Sample achievements
+  // Achievements
   const achievementsExist = await prisma.achievement.count();
   if (!achievementsExist) {
     await prisma.achievement.createMany({
       data: [
         {
-          title: 'National Hackathon Winner',
-          description: 'First place at National Data Science Hackathon — built a predictive healthcare model with 91% accuracy.',
-          date: new Date('2024-03-15'),
-          issuer: 'National CS Society',
+          title: 'International Best Researcher Award',
+          description: 'Recognized at the Asia Research Award 2025 for outstanding contributions to data science and analytics research at an international level.',
+          date: new Date('2025-01-01'),
+          issuer: 'Asia Research Award 2025',
           type: 'Award',
+          tags: ['Research', 'International', 'Data Science'],
+          featured: true,
+          visible: true,
           order: 1,
         },
         {
-          title: 'Best Research Paper Award',
-          description: 'Recognized for outstanding contribution in ML-based anomaly detection at the International Conference.',
-          date: new Date('2023-11-20'),
-          issuer: 'IEEE International Conference',
-          type: 'Academic',
+          title: 'Membership, American Chamber of Research',
+          description: 'Inducted as a member recognizing contributions to research and innovation in computer science and data analytics.',
+          date: new Date('2025-01-01'),
+          issuer: 'American Chamber of Research',
+          type: 'Professional',
+          tags: ['Research', 'Membership', 'Professional'],
+          featured: false,
+          visible: true,
           order: 2,
-        },
-        {
-          title: 'Dean\'s List — 3 Consecutive Semesters',
-          description: 'Maintained a GPA of 3.9+ across three semesters in Computer Science and Data Science courses.',
-          date: new Date('2023-06-01'),
-          issuer: 'University',
-          type: 'Academic',
-          order: 3,
         },
       ],
     });
@@ -211,6 +209,73 @@ async function main() {
           tags: ['Transformers', 'Time Series', 'Finance'],
           featured: true,
         },
+      ],
+    });
+  }
+
+  // About Profile
+  const aboutExists = await prisma.aboutProfile.count();
+  if (!aboutExists) {
+    await prisma.aboutProfile.create({
+      data: {
+        name: 'Abir Barman',
+        title: 'Data Analytics Professional',
+        subtitle: 'Data Collection & Preparation | Reporting & Insights Generation',
+        summary: 'Data analytics professional experienced in collecting, integrating, and preparing data using Python, SQL, and Microsoft Excel to support data-driven campaigns. Acted in analytics initiatives where I designed, developed, and reported insights through Microsoft Power BI dashboards, supporting business teams. Skilled in critical thinking, problem-solving, teamwork, project management, and adaptability, working in Agile environments to deliver reliable analytics that furthered campaign performance. Committed to continuous learning and improving analytics processes.',
+        phone: '+91 8670321835',
+        email: 'abirbarman@proton.me',
+        linkedinUrl: 'https://linkedin.com/in/abir-barman',
+        location: 'India',
+        primaryPhoto: '',
+        secondaryPhoto: '',
+        showSummary: true,
+        showEducation: true,
+        showAchievements: true,
+        showSkills: true,
+      },
+    });
+  }
+
+  // Education
+  const educationExists = await prisma.education.count();
+  if (!educationExists) {
+    await prisma.education.createMany({
+      data: [
+        {
+          degree: 'Master of Computer Applications (MCA)',
+          institution: 'VIT Bhopal University',
+          location: 'Bhopal, Madhya Pradesh',
+          startDate: '08/2024',
+          endDate: '06/2026',
+          description: '',
+          order: 1,
+          visible: true,
+        },
+        {
+          degree: 'B.Sc. Computer Science Honours',
+          institution: 'Kalyani Mahavidyalaya',
+          location: 'Kalyani, West Bengal',
+          startDate: '08/2021',
+          endDate: '06/2024',
+          description: '',
+          order: 2,
+          visible: true,
+        },
+      ],
+    });
+  }
+
+  // About Skill Groups
+  const aboutSkillsExist = await prisma.aboutSkillGroup.count();
+  if (!aboutSkillsExist) {
+    await prisma.aboutSkillGroup.createMany({
+      data: [
+        { category: 'Programming', skills: ['Python', 'SQL'], order: 1, visible: true },
+        { category: 'Data Processing', skills: ['Data Cleaning', 'Data Transformation', 'Data Validation', 'CSV/JSON'], order: 2, visible: true },
+        { category: 'Analytics Tools', skills: ['Microsoft Excel', 'Power BI'], order: 3, visible: true },
+        { category: 'Databases', skills: ['PostgreSQL', 'RDBMS fundamentals'], order: 4, visible: true },
+        { category: 'Development Tools', skills: ['Git', 'GitHub'], order: 5, visible: true },
+        { category: 'Core Competencies', skills: ['Data Analysis', 'Reporting', 'Automation', 'Problem Solving', 'Attention to Detail'], order: 6, visible: true },
       ],
     });
   }

@@ -17,6 +17,8 @@ import type {
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 const BUILD_FETCH_TIMEOUT_MS = 5000;
 
+export const dynamic = 'force-dynamic';
+
 async function fetchData<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API}${path}`, {

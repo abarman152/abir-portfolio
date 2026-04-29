@@ -5,19 +5,21 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Moon, Sun, Menu, X, Code2 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const navLinks = [
   { href: '/',               label: 'Home' },
-  { href: '#about',          label: 'About Me' },
-  { href: '#projects',       label: 'Projects' },
-  { href: '#research',       label: 'Research' },
-  { href: '#certifications', label: 'Certifications' },
-  { href: '#achievements',   label: 'Achievements' },
-  { href: '#contact',        label: 'Contact' },
+  { href: '/about',          label: 'About' },
+  { href: '/#projects',      label: 'Projects' },
+  { href: '/#research',      label: 'Research' },
+  { href: '/#certifications', label: 'Certifications' },
+  { href: '/#achievements',  label: 'Achievements' },
+  { href: '/#contact',       label: 'Contact' },
 ];
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
   const [scrolled, setScrolled]     = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
@@ -29,16 +31,21 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (pathname !== '/') return;
     const obs = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) setActiveSection(e.target.id); }),
       { threshold: 0.4 }
     );
     document.querySelectorAll('section[id]').forEach((s) => obs.observe(s));
     return () => obs.disconnect();
-  }, []);
+  }, [pathname]);
 
-  const isActive = (href: string) =>
-    href === '/' ? activeSection === '' : activeSection === href.slice(1);
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/' && activeSection === '';
+    if (href === '/about') return pathname === '/about';
+    if (href.startsWith('/#')) return pathname === '/' && activeSection === href.slice(2);
+    return false;
+  };
 
   return (
     <>
@@ -81,21 +88,26 @@ export default function Navbar() {
         >
           {navLinks.map((link) => {
             const active = isActive(link.href);
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                style={{
-                  padding: '0.35rem 0.7rem',
-                  borderRadius: '7px',
-                  fontSize: '0.825rem',
-                  fontWeight: active ? 600 : 400,
-                  color: active ? 'var(--text)' : 'var(--text-2)',
-                  background: active ? 'var(--bg-3)' : 'transparent',
-                  textDecoration: 'none',
-                  transition: 'color 0.15s, background 0.15s',
-                  whiteSpace: 'nowrap',
-                }}
+            const linkStyle: React.CSSProperties = {
+              padding: '0.35rem 0.7rem',
+              borderRadius: '7px',
+              fontSize: '0.825rem',
+              fontWeight: active ? 600 : 400,
+              color: active ? 'var(--text)' : 'var(--text-2)',
+              background: active ? 'var(--bg-3)' : 'transparent',
+              textDecoration: 'none',
+              transition: 'color 0.15s, background 0.15s',
+              whiteSpace: 'nowrap',
+            };
+            return link.href.startsWith('/') && !link.href.startsWith('/#') ? (
+              <Link key={link.href} href={link.href} style={linkStyle}
+                onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
+                onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; }}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a key={link.href} href={link.href} style={linkStyle}
                 onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
                 onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; }}
               >
@@ -188,21 +200,14 @@ export default function Navbar() {
               padding: '0.75rem 2rem 1.25rem',
             }}
           >
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  display: 'block', padding: '0.65rem 0',
-                  color: 'var(--text-2)', textDecoration: 'none',
-                  borderBottom: '1px solid var(--border)',
-                  fontSize: '0.9rem', fontWeight: 500,
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const mobileStyle: React.CSSProperties = { display: 'block', padding: '0.65rem 0', color: 'var(--text-2)', textDecoration: 'none', borderBottom: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 500 };
+              return link.href.startsWith('/') && !link.href.startsWith('/#') ? (
+                <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)} style={mobileStyle}>{link.label}</Link>
+              ) : (
+                <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} style={mobileStyle}>{link.label}</a>
+              );
+            })}
             <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1rem' }}>
               <a href="#" style={{ flex: 1, padding: '0.65rem', textAlign: 'center', borderRadius: '8px', border: '1px solid var(--border)', color: 'var(--text-2)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>
                 Resume

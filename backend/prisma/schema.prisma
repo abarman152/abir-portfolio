@@ -137,3 +137,44 @@ model SiteSettings {
   metaDesc     String @default("Portfolio of Abir Barman - Data Scientist & Full Stack Developer")
   ogImageUrl   String @default("")
 }
+
+model AboutProfile {
+  id               String   @id @default(cuid())
+  name             String   @default("Abir Barman")
+  title            String   @default("Data Analytics Professional")
+  subtitle         String   @default("Data Collection & Preparation | Reporting & Insights Generation")
+  summary          String   @default("")
+  phone            String   @default("+91 8670321835")
+  email            String   @default("abirbarman@proton.me")
+  linkedinUrl      String   @default("https://linkedin.com/in/abir-barman")
+  location         String   @default("India")
+  primaryPhoto     String   @default("")
+  secondaryPhoto   String   @default("")
+  showSummary      Boolean  @default(true)
+  showEducation    Boolean  @default(true)
+  showAchievements Boolean  @default(true)
+  showSkills       Boolean  @default(true)
+  updatedAt        DateTime @default(now()) @updatedAt
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  degree      String
+  institution String
+  location    String   @default("")
+  startDate   String
+  endDate     String   @default("Present")
+  description String   @default("")
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model AboutSkillGroup {
+  id       String   @id @default(cuid())
+  category String
+  skills   String[]
+  order    Int      @default(0)
+  visible  Boolean  @default(true)
+}

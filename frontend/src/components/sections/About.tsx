@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Brain, Database, Lightbulb } from 'lucide-react';
+import { Brain, Database, Lightbulb, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const PILLARS = [
   {
@@ -80,6 +81,39 @@ export default function About() {
                 <span key={tag} className="tag">{tag}</span>
               ))}
             </div>
+
+            {/* View More */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.45 }}
+              style={{ marginTop: '2rem' }}
+            >
+              <Link
+                href="/about"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.65rem 1.4rem',
+                  borderRadius: '9px',
+                  border: '1px solid var(--border)',
+                  background: 'transparent', color: 'var(--text)',
+                  fontSize: '0.875rem', fontWeight: 500,
+                  textDecoration: 'none',
+                  transition: 'border-color 0.15s, color 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--accent)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--text)';
+                }}
+              >
+                View Full Profile <ArrowRight size={14} />
+              </Link>
+            </motion.div>
           </motion.div>
 
           {/* Right — Pillars (3 cards, stacked column) */}

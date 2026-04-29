@@ -12,6 +12,7 @@ import statsRoutes from './routes/stats';
 import socialRoutes from './routes/social';
 import contactRoutes from './routes/contact';
 import settingsRoutes from './routes/settings';
+import aboutRoutes from './routes/about';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/about', aboutRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 

@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderOpen, BookOpen, Award, Trophy,
   BarChart2, Link2, Settings, MessageSquare, LogOut, Code2,
-  Moon, Sun, Menu, X, TrendingUp,
+  Moon, Sun, Menu, X, TrendingUp, UserCircle,
 } from 'lucide-react';
 import { useTheme } from '../ThemeProvider';
 
 const NAV_ITEMS = [
   { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/admin/about', icon: UserCircle, label: 'About Page' },
   { href: '/admin/projects', icon: FolderOpen, label: 'Projects' },
   { href: '/admin/research', icon: BookOpen, label: 'Research' },
   { href: '/admin/certifications', icon: Award, label: 'Certifications' },

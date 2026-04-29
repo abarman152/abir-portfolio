@@ -167,3 +167,25 @@ a:hover { opacity: 0.8; }
   .hero-photo { display: none !important; }
   .about-grid { grid-template-columns: 1fr !important; }
 }
+
+/* ─── About page layout ──────────────────────────────────── */
+.about-page-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+  align-items: center;
+}
+
+.about-skill-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .about-page-header    { grid-template-columns: 1fr; }
+  .about-page-photo     { display: none !important; }
+  .about-secondary-photo { display: none !important; }
+  .about-skill-row      { grid-template-columns: 1fr !important; }
+}

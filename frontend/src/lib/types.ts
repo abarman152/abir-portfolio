@@ -104,6 +104,44 @@ export interface SiteSettings {
   ogImageUrl: string;
 }
 
+export interface AboutProfile {
+  id: string;
+  name: string;
+  title: string;
+  subtitle: string;
+  summary: string;
+  phone: string;
+  email: string;
+  linkedinUrl: string;
+  location: string;
+  primaryPhoto: string;
+  secondaryPhoto: string;
+  showSummary: boolean;
+  showEducation: boolean;
+  showAchievements: boolean;
+  showSkills: boolean;
+}
+
+export interface Education {
+  id: string;
+  degree: string;
+  institution: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  order: number;
+  visible: boolean;
+}
+
+export interface AboutSkillGroup {
+  id: string;
+  category: string;
+  skills: string[];
+  order: number;
+  visible: boolean;
+}
+
 export interface ContactMessage {
   id: string;
   name: string;
