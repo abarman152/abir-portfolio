@@ -1,30 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, ExternalLink, Calendar, Star } from 'lucide-react';
+import { Award, ExternalLink, Calendar, Star, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 import type { Certification } from '@/lib/types';
 
+const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
+
 function CertCard({ cert }: { cert: Certification }) {
-  const [expanded, setExpanded] = useState(false);
-  const hasDescription = cert.description && cert.description.trim().length > 0;
-  const isLong = hasDescription && cert.description.length > 120;
+  const router = useRouter();
+  const hasSlug = !!cert.slug;
+  const href    = hasSlug ? `/certifications/${cert.slug}` : null;
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('a, button')) return;
+    if (href) router.push(href);
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.25, ease: EASE }}
       className="card"
-      style={{ padding: '1.25rem', overflow: 'hidden', position: 'relative' }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)';
+      onClick={handleCardClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' && href) router.push(href); }}
+      tabIndex={href ? 0 : undefined}
+      role={href ? 'article' : undefined}
+      aria-label={href ? `${cert.title} — view credential` : undefined}
+      style={{
+        padding: '1.25rem', overflow: 'hidden', position: 'relative',
+        cursor: href ? 'pointer' : 'default', outline: 'none',
       }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-      }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)'; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; }}
     >
-      {/* Top accent bar — amber for featured, accent for others */}
+      {/* Top accent bar */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
         background: cert.featured ? '#f59e0b' : 'var(--accent)',
@@ -38,27 +51,25 @@ function CertCard({ cert }: { cert: Certification }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           {cert.imageUrl
-            ? <img src={cert.imageUrl} alt={cert.issuer} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+            ? <img src={cert.imageUrl} alt={cert.issuer} style={{ width: 24, height: 24, objectFit: 'contain' }} loading="lazy" />
             : <Award size={18} style={{ color: cert.featured ? '#f59e0b' : 'var(--accent)' }} />
           }
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {cert.featured && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-                padding: '0.15rem 0.45rem', borderRadius: '4px',
-                background: '#f59e0b15', border: '1px solid #f59e0b33',
-                color: '#f59e0b', fontSize: '0.65rem', fontWeight: 700,
-                flexShrink: 0, marginTop: '0.1rem',
-              }}>
-                <Star size={8} /> Featured
-              </span>
-            )}
-          </div>
+          {cert.featured && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+              padding: '0.15rem 0.45rem', borderRadius: '4px',
+              background: '#f59e0b15', border: '1px solid #f59e0b33',
+              color: '#f59e0b', fontSize: '0.65rem', fontWeight: 700,
+              marginBottom: '0.3rem',
+            }}>
+              <Star size={8} /> Featured
+            </span>
+          )}
           <h3 style={{
             fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)',
-            lineHeight: 1.35, marginTop: cert.featured ? '0.3rem' : 0,
+            lineHeight: 1.35, display: 'block',
           }}>
             {cert.title}
           </h3>
@@ -69,36 +80,20 @@ function CertCard({ cert }: { cert: Certification }) {
       </div>
 
       {/* Description */}
-      {hasDescription && (
-        <div style={{ marginTop: '0.875rem' }}>
-          <p style={{
-            fontSize: '0.8rem', color: 'var(--text-2)', lineHeight: 1.65,
-            display: isLong && !expanded ? '-webkit-box' : 'block',
-            WebkitLineClamp: isLong && !expanded ? 2 : undefined,
-            WebkitBoxOrient: isLong && !expanded ? 'vertical' : undefined,
-            overflow: isLong && !expanded ? 'hidden' : 'visible',
-          }}>
-            {cert.description}
-          </p>
-          {isLong && (
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              style={{
-                marginTop: '0.3rem', background: 'none', border: 'none', padding: 0,
-                color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600,
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              {expanded ? 'Show less' : 'Read more'}
-            </button>
-          )}
-        </div>
+      {cert.description && (
+        <p style={{
+          fontSize: '0.8rem', color: 'var(--text-2)', lineHeight: 1.65,
+          marginTop: '0.875rem',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>
+          {cert.description}
+        </p>
       )}
 
       {/* Tags */}
       {cert.tags && cert.tags.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.875rem' }}>
-          {cert.tags.map((tag) => (
+          {cert.tags.slice(0, 4).map((tag) => (
             <span key={tag} className="tag" style={{ fontSize: '0.68rem' }}>{tag}</span>
           ))}
         </div>
@@ -106,19 +101,15 @@ function CertCard({ cert }: { cert: Certification }) {
 
       {/* Footer */}
       <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', marginTop: '1rem',
-        paddingTop: (hasDescription || (cert.tags && cert.tags.length > 0)) ? '0.75rem' : 0,
-        borderTop: (hasDescription || (cert.tags && cert.tags.length > 0)) ? '1px solid var(--border)' : 'none',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-3)', fontSize: '0.78rem' }}>
           <Calendar size={11} />
           {new Date(cert.issueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <span className="tag" style={{ fontSize: '0.68rem', color: 'var(--accent)' }}>
-            {cert.category}
-          </span>
+          <span className="tag" style={{ fontSize: '0.68rem', color: 'var(--accent)' }}>{cert.category}</span>
           {cert.credentialUrl && (
             <a
               href={cert.credentialUrl}
@@ -127,9 +118,21 @@ function CertCard({ cert }: { cert: Certification }) {
               style={{ color: 'var(--text-3)', transition: 'color 0.15s' }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--accent)')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}
+              title="View Credential"
             >
               <ExternalLink size={13} />
             </a>
+          )}
+          {href && (
+            <Link
+              href={href}
+              style={{ color: 'var(--text-3)', transition: 'color 0.15s', display: 'flex', alignItems: 'center' }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--accent)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}
+              title="View Details"
+            >
+              <ArrowRight size={13} />
+            </Link>
           )}
         </div>
       </div>
@@ -161,26 +164,27 @@ export default function Certifications({ certs }: { certs: Certification[] }) {
           </p>
         </motion.div>
 
-        {/* Filter tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActive(cat)}
-              style={{
-                padding: '0.35rem 0.875rem', borderRadius: '7px', border: '1px solid',
-                borderColor: active === cat ? 'var(--accent)' : 'var(--border)',
-                background: active === cat ? 'var(--accent-dim)' : 'transparent',
-                color: active === cat ? 'var(--accent)' : 'var(--text-2)',
-                fontSize: '0.82rem', fontWeight: active === cat ? 600 : 400,
-                cursor: 'pointer', transition: 'all 0.15s',
-                fontFamily: 'inherit',
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {/* Category filter tabs */}
+        {categories.length > 2 && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActive(cat)}
+                style={{
+                  padding: '0.35rem 0.875rem', borderRadius: '7px', border: '1px solid',
+                  borderColor: active === cat ? 'var(--accent)' : 'var(--border)',
+                  background: active === cat ? 'var(--accent-dim)' : 'transparent',
+                  color: active === cat ? 'var(--accent)' : 'var(--text-2)',
+                  fontSize: '0.82rem', fontWeight: active === cat ? 600 : 400,
+                  cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'inherit',
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -189,15 +193,9 @@ export default function Certifications({ certs }: { certs: Certification[] }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1rem',
-            }}
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}
           >
-            {filtered.map((cert) => (
-              <CertCard key={cert.id} cert={cert} />
-            ))}
+            {filtered.map((cert) => <CertCard key={cert.id} cert={cert} />)}
           </motion.div>
         </AnimatePresence>
 
@@ -206,6 +204,38 @@ export default function Certifications({ certs }: { certs: Certification[] }) {
             No certifications in this category yet.
           </p>
         )}
+
+        {/* View All button */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.35, delay: 0.15, ease: EASE }}
+          style={{ textAlign: 'center', marginTop: '2.5rem' }}
+        >
+          <Link
+            href="/certifications"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
+              padding: '0.65rem 1.5rem', borderRadius: '10px',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-2)', textDecoration: 'none',
+              fontSize: '0.875rem', fontWeight: 600,
+              transition: 'border-color 0.15s, color 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--accent)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--text-2)';
+            }}
+          >
+            View All Certifications <ArrowRight size={14} />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

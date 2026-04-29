@@ -83,6 +83,7 @@ export interface ResearchListResponse {
 
 export interface Certification {
   id: string;
+  slug: string | null;
   title: string;
   issuer: string;
   issueDate: string;
@@ -90,11 +91,24 @@ export interface Certification {
   credentialId: string;
   credentialUrl: string;
   imageUrl: string;
+  badgeImageUrl: string;
   category: string;
   description: string;
+  overviewMd: string;
+  skills: string[];
   tags: string[];
   featured: boolean;
   visible: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CertificationListResponse {
+  items: Certification[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 export interface Achievement {

@@ -42,38 +42,7 @@ const DEFAULT_HERO: HeroContent = {
   avatarUrl: '',
 };
 
-const DEFAULT_CERTS: Certification[] = [
-  {
-    id: 'oracle-oci-ai-2025',
-    title: 'Oracle Cloud Infrastructure 2025 Certified AI Foundations Associate',
-    issuer: 'Oracle',
-    issueDate: '2026-02-01',
-    expiryDate: undefined,
-    credentialId: '103400391OCI25AICFA',
-    credentialUrl: '',
-    imageUrl: '',
-    category: 'Cloud & AI',
-    description: 'Foundational certification covering AI concepts, machine learning fundamentals, and OCI AI services.',
-    tags: [],
-    featured: true,
-    visible: true,
-  },
-  {
-    id: 'generative-ai-mastermind',
-    title: 'Generative AI Mastermind Program',
-    issuer: 'Outskill',
-    issueDate: '2026-01-01',
-    expiryDate: undefined,
-    credentialId: '',
-    credentialUrl: '',
-    imageUrl: '',
-    category: 'AI / Generative AI',
-    description: 'Completed an advanced program focused on Generative AI concepts and real-world applications. Gained hands-on exposure to modern AI tools, model workflows, and practical implementation strategies. Mentored by Vaibhav Sisinty.',
-    tags: ['Generative AI', 'LLMs', 'AI Systems'],
-    featured: false,
-    visible: true,
-  },
-];
+const DEFAULT_CERTS: Certification[] = [];
 
 export default async function HomePage() {
   const [hero, socials, projects, papers, skills, certs, achievements, stats] = await Promise.all([
@@ -82,15 +51,10 @@ export default async function HomePage() {
     fetchData<Project[]>('/projects/featured', []),
     fetchData<ResearchItem[]>('/research/featured', []),
     fetchData<Skill[]>('/skills', []),
-    fetchData<Certification[]>('/certifications', DEFAULT_CERTS),
+    fetchData<Certification[]>('/certifications/featured', DEFAULT_CERTS),
     fetchData<Achievement[]>('/achievements', []),
     fetchData<Stat[]>('/stats', []),
   ]);
-
-  /* Merge default Oracle cert if not already present in API data */
-  const displayCerts = certs.length > 0
-    ? certs
-    : DEFAULT_CERTS;
 
   return (
     <>
@@ -115,7 +79,7 @@ export default async function HomePage() {
         <Research papers={papers} />
 
         {/* 5. Certifications */}
-        <Certifications certs={displayCerts} />
+        <Certifications certs={certs} />
 
         {/* 6. Achievements */}
         <Achievements achievements={achievements} />
