@@ -1,120 +1,19 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
-import Link from 'next/link';
+import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PaperCard from '@/components/ui/PaperCard';
 import type { Research } from '@/lib/types';
 
 const API      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 const PER_PAGE = 9;
 const EASE     = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
-const ACCENT_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
-
-function authorSummary(authors: Research['authors']): string {
-  if (!authors?.length) return '';
-  const primary = authors.find((a) => a.isPrimary);
-  const first   = primary ?? authors[0];
-  const rest    = authors.filter((a) => a !== first);
-  if (rest.length === 0) return first.name;
-  if (rest.length === 1) return `${first.name} & ${rest[0].name}`;
-  return `${first.name} +${rest.length} more`;
-}
 
 function pubYear(iso: string): string {
   try { return new Date(iso).getFullYear().toString(); } catch { return ''; }
-}
-
-/* ─── Research card ──────────────────────────────────────────── */
-function ResearchCard({ item, index }: { item: Research; index: number }) {
-  const router = useRouter();
-  const color  = ACCENT_COLORS[index % ACCENT_COLORS.length];
-  const href   = `/research/${item.slug}`;
-
-  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('a, button')) return;
-    router.push(href);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.25), ease: EASE }}
-      className="card"
-      onClick={handleCardClick}
-      onKeyDown={(e) => { if (e.key === 'Enter') router.push(href); }}
-      tabIndex={0}
-      role="article"
-      aria-label={`${item.title} — view research`}
-      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', outline: 'none' }}
-    >
-      {/* Top accent */}
-      <div style={{ height: '3px', background: color }} />
-
-      <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-        {/* Header row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '9px', background: color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <BookOpen size={16} style={{ color }} />
-          </div>
-          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-            {item.featured && (
-              <span style={{ padding: '0.18rem 0.5rem', borderRadius: '4px', background: '#f59e0b15', border: '1px solid #f59e0b33', color: '#f59e0b', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em' }}>
-                FEATURED
-              </span>
-            )}
-            {item.publishedAt && (
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{pubYear(item.publishedAt)}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Title */}
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.35 }}>
-          {item.title}
-        </h3>
-
-        {/* Abstract */}
-        {item.abstract && (
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-2)', lineHeight: 1.65, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {item.abstract}
-          </p>
-        )}
-
-        {/* Publisher */}
-        {item.publisher && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: 600, color, opacity: 0.85 }}>{item.publisher}</span>
-          </div>
-        )}
-
-        {/* Tags */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: 'auto' }}>
-          {(item.tags ?? []).slice(0, 4).map((t) => <span key={t} className="tag">{t}</span>)}
-          {(item.tags ?? []).length > 4 && <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', padding: '0.2rem 0.35rem' }}>+{item.tags.length - 4}</span>}
-        </div>
-
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
-          <Link href={href} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem', fontWeight: 600, color, textDecoration: 'none' }}>
-            Read More <ArrowRight size={13} />
-          </Link>
-          <div style={{ display: 'flex', gap: '0.625rem', marginLeft: 'auto', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{authorSummary(item.authors)}</span>
-            {item.publicationUrl && (
-              <a href={item.publicationUrl} target="_blank" rel="noopener noreferrer" title="View Publication" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--text-3)', transition: 'color 0.15s', display: 'flex' }} onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text)')} onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}>
-                <ExternalLink size={14} />
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
 }
 
 /* ─── Main page ──────────────────────────────────────────────── */
@@ -311,15 +210,15 @@ export default function ResearchPage() {
           </div>
 
           {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} style={{ height: '280px', borderRadius: '16px', background: 'var(--bg-2)', border: '1px solid var(--border)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} style={{ height: '140px', borderRadius: '14px', background: 'var(--bg-2)', border: '1px solid var(--border)', animation: 'pulse 1.5s ease-in-out infinite' }} />
               ))}
             </div>
           ) : paginated.length > 0 ? (
             <AnimatePresence mode="wait">
-              <div key={`${search}-${tagFilter.join()}-${yearFilter}-${featured}-${sort}-${page}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-                {paginated.map((item, i) => <ResearchCard key={item.id} item={item} index={i} />)}
+              <div key={`${search}-${tagFilter.join()}-${yearFilter}-${featured}-${sort}-${page}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {paginated.map((item, i) => <PaperCard key={item.id} paper={item} index={i} animate="animate" />)}
               </div>
             </AnimatePresence>
           ) : (
