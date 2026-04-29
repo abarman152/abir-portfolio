@@ -182,32 +182,63 @@ async function main() {
     });
   }
 
-  // Sample research papers
-  const researchExist = await prisma.researchPaper.count();
+  // Sample research items
+  const researchExist = await prisma.research.count();
   if (!researchExist) {
-    await prisma.researchPaper.createMany({
+    await prisma.research.createMany({
       data: [
         {
-          title: 'Anomaly Detection in IoT Sensor Networks Using Federated Learning',
-          abstract: 'We propose a federated learning framework for real-time anomaly detection across distributed IoT sensor networks, achieving 97.3% detection accuracy while preserving data privacy.',
-          authors: ['Abir Barman', 'Dr. Rahman', 'Prof. Chowdhury'],
-          journal: 'IEEE IoT Journal',
-          year: 2024,
-          doi: '10.1109/JIOT.2024.0001',
-          paperUrl: '',
-          tags: ['Federated Learning', 'IoT', 'Anomaly Detection'],
+          slug: 'quantum-bias-detection-nlp',
+          title: 'Bridging Quantum Computing and NLP: A Novel Framework for Advanced Bias Detection with Next-Generation Computing',
+          abstract: 'Proposes a hybrid quantum-classical framework for bias detection in NLP using quantum embeddings and kernel methods. Demonstrates improved accuracy and sensitivity for complex linguistic bias patterns.',
+          overviewMd: '',
+          authors: [
+            { name: 'Abir Barman', role: 'Co-Author', isPrimary: true },
+            { name: 'Dr. M.K. Jayanthi Kannan', role: 'Supervisor', isPrimary: false },
+            { name: 'Anjali Yadav', role: 'Co-Author', isPrimary: false },
+          ],
+          publishedAt: new Date('2025-01-01'),
+          publisher: 'IJFMR',
+          publicationUrl: '',
+          googleScholarUrl: '',
+          tags: ['Quantum Computing', 'NLP', 'Bias Detection', 'Quantum ML'],
           featured: true,
+          order: 1,
         },
         {
-          title: 'Transformer-Based Time Series Forecasting for Financial Markets',
-          abstract: 'A novel transformer architecture adapted for financial time series with attention mechanisms capturing both short and long-term temporal dependencies.',
-          authors: ['Abir Barman', 'Prof. Islam'],
-          journal: 'arXiv preprint',
-          year: 2023,
-          doi: '',
-          paperUrl: '',
-          tags: ['Transformers', 'Time Series', 'Finance'],
-          featured: true,
+          slug: 'logix-ai-secure-login-quantum-resistant',
+          title: 'LogiX: AI-Driven Secure Login System with Quantum-Resistant Algorithms and Multi-Factor Authentication',
+          abstract: 'Introduces a secure authentication framework integrating post-quantum cryptography, anomaly detection, and adaptive multi-factor authentication to address evolving cybersecurity threats.',
+          overviewMd: '',
+          authors: [
+            { name: 'Abir Barman', role: 'Co-Author', isPrimary: true },
+            { name: 'Dr. M.K. Jayanthi Kannan', role: 'Supervisor', isPrimary: false },
+            { name: 'Anjali Yadav', role: 'Co-Author', isPrimary: false },
+          ],
+          publishedAt: new Date('2025-03-01'),
+          publisher: 'IJARIIT',
+          publicationUrl: '',
+          googleScholarUrl: '',
+          tags: ['Cybersecurity', 'Quantum Cryptography', 'AI Security', 'Authentication'],
+          featured: false,
+          order: 2,
+        },
+        {
+          slug: 'classification-neural-network-genetic-algorithm',
+          title: 'Classification Using Neural Network and Genetic Algorithm',
+          abstract: 'Explores a hybrid AI approach combining neural networks and genetic algorithms to optimize model structure and weights. Addresses limitations of traditional backpropagation by improving convergence speed and classification accuracy through evolutionary optimization.',
+          overviewMd: '',
+          authors: [
+            { name: 'Abir Barman', role: 'Lead Author', isPrimary: true },
+            { name: 'Muskan Sinha', role: 'Co-Author', isPrimary: false },
+          ],
+          publishedAt: new Date('2025-06-01'),
+          publisher: 'New Delhi Publishers',
+          publicationUrl: '',
+          googleScholarUrl: '',
+          tags: ['Neural Networks', 'Genetic Algorithm', 'Optimization', 'Machine Learning'],
+          featured: false,
+          order: 3,
         },
       ],
     });
