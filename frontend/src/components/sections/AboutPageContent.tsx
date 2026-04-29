@@ -139,7 +139,7 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
                 {...fadeUp(0.24)}
                 style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}
               >
-                {contacts.map(({ icon: Icon, text, href }, i) => (
+                {socialLinks.map(({ icon: Icon, label: text, href }, i) => (
                   <span
                     key={i}
                     style={{
