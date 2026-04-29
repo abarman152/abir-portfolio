@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { GitFork, ExternalLink, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -8,7 +9,14 @@ import type { Project } from '@/lib/types';
 const ACCENT_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const color = ACCENT_COLORS[index % ACCENT_COLORS.length];
+  const router = useRouter();
+  const color  = ACCENT_COLORS[index % ACCENT_COLORS.length];
+  const href   = `/projects/${project.slug}`;
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('a, button')) return;
+    router.push(href);
+  };
 
   return (
     <motion.div
@@ -17,7 +25,12 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       viewport={{ once: true }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.07, 0.28), ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
       className="card"
-      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+      onClick={handleCardClick}
+      onKeyDown={(e) => { if (e.key === 'Enter') router.push(href); }}
+      tabIndex={0}
+      role="article"
+      aria-label={`${project.title} — view case study`}
+      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', outline: 'none' }}
     >
       <div style={{ height: '3px', background: color, flexShrink: 0 }} />
 

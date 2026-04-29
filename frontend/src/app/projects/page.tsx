@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ArrowRight, GitFork, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +16,14 @@ const ACCENT_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#
 
 /* ─── Project card ─────────────────────────────────────────────────── */
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const color = ACCENT_COLORS[index % ACCENT_COLORS.length];
+  const router = useRouter();
+  const color  = ACCENT_COLORS[index % ACCENT_COLORS.length];
+  const href   = `/projects/${project.slug}`;
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('a, button')) return;
+    router.push(href);
+  };
 
   return (
     <motion.div
@@ -23,7 +31,12 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.25), ease: EASE }}
       className="card"
-      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+      onClick={handleCardClick}
+      onKeyDown={(e) => { if (e.key === 'Enter') router.push(href); }}
+      tabIndex={0}
+      role="article"
+      aria-label={`${project.title} — view case study`}
+      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', outline: 'none' }}
     >
       <div style={{ height: '3px', background: color }} />
       <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
