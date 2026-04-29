@@ -55,51 +55,96 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
     <div style={{ paddingTop: '60px', minHeight: '100vh', background: 'var(--bg)' }}>
 
       {/* ── HEADER ──────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border)', padding: '4rem 0 3.5rem' }}>
+      <section style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border)', padding: '5rem 0 4.5rem' }}>
         <div style={SECTION_WRAP}>
           <div className="about-page-header">
 
             {/* Left: identity */}
             <div style={{ minWidth: 0 }}>
+
+              {/* Eyebrow */}
               <motion.span
                 {...fadeUp(0)}
-                style={{ display: 'inline-block', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '1rem' }}
+                style={{ display: 'inline-block', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '1.5rem' }}
               >
                 Portfolio · About
               </motion.span>
 
+              {/* Name — hero-level */}
               <motion.h1
-                {...fadeUp(0.06)}
-                style={{ fontSize: 'clamp(1.9rem, 4vw, 2.75rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', color: 'var(--text)', marginBottom: '0.5rem' }}
+                {...fadeUp(0.07)}
+                style={{
+                  fontSize: 'clamp(2.4rem, 5vw, 3.5rem)',
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.04em',
+                  color: 'var(--text)',
+                  marginBottom: '1rem',
+                }}
               >
                 {profile.name}
               </motion.h1>
 
+              {/* Title */}
               <motion.p
-                {...fadeUp(0.12)}
-                style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.4rem' }}
+                {...fadeUp(0.13)}
+                style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}
               >
                 {profile.title}
               </motion.p>
 
-              <motion.p
-                {...fadeUp(0.17)}
-                style={{ fontSize: '0.875rem', color: 'var(--text-2)', marginBottom: '2rem', lineHeight: 1.6, maxWidth: '540px' }}
+              {/* Subtitle — two lines split on " | " */}
+              <motion.div
+                {...fadeUp(0.18)}
+                style={{ marginBottom: '2.5rem' }}
               >
-                {profile.subtitle}
-              </motion.p>
+                {(profile.subtitle || '').split('|').map((line, i) => (
+                  <p
+                    key={i}
+                    style={{ fontSize: '0.875rem', color: 'var(--text-3)', lineHeight: 1.7, fontWeight: 400 }}
+                  >
+                    {line.trim()}
+                  </p>
+                ))}
+              </motion.div>
 
-              {/* Contact pills */}
-              <motion.div {...fadeUp(0.23)} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {/* Contact chips */}
+              <motion.div
+                {...fadeUp(0.24)}
+                style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}
+              >
                 {contacts.map(({ icon: Icon, text, href }, i) => (
-                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.375rem 0.8rem', borderRadius: '8px', background: 'var(--bg-3)', border: '1px solid var(--border)', fontSize: '0.775rem', color: 'var(--text-2)' }}>
-                    <Icon size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                  <span
+                    key={i}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                      padding: '0.45rem 1rem',
+                      borderRadius: '8px',
+                      background: 'var(--bg-3)',
+                      border: '1px solid var(--border)',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-2)',
+                      transition: 'border-color 0.15s, color 0.15s',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--text)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--text-2)';
+                    }}
+                  >
+                    <Icon size={13} style={{ color: 'var(--accent)', flexShrink: 0 }} />
                     {href ? (
-                      <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
-                         style={{ color: 'inherit', textDecoration: 'none' }}
-                         onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text)')}
-                         onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-2)')}
-                      >{text}</a>
+                      <a
+                        href={href}
+                        target={href.startsWith('http') ? '_blank' : undefined}
+                        rel="noopener noreferrer"
+                        style={{ color: 'inherit', textDecoration: 'none' }}
+                      >
+                        {text}
+                      </a>
                     ) : text}
                   </span>
                 ))}
