@@ -113,6 +113,7 @@ export interface AboutProfile {
   phone: string;
   email: string;
   linkedinUrl: string;
+  githubUrl: string;
   location: string;
   primaryPhoto: string;
   secondaryPhoto: string;

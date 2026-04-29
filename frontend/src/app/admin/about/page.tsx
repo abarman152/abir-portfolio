@@ -187,6 +187,11 @@ export default function AdminAbout() {
                   <FormField label="LinkedIn URL">
                     <input style={inputCss} value={profile.linkedinUrl || ''} onChange={e => setProfile({ ...profile, linkedinUrl: e.target.value })} placeholder="https://linkedin.com/in/..." />
                   </FormField>
+                  <FormField label="GitHub URL">
+                    <input style={inputCss} value={profile.githubUrl || ''} onChange={e => setProfile({ ...profile, githubUrl: e.target.value })} placeholder="https://github.com/..." />
+                  </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
                   <FormField label="Location">
                     <input style={inputCss} value={profile.location || ''} onChange={e => setProfile({ ...profile, location: e.target.value })} />
                   </FormField>
