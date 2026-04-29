@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff, Star } from 'lucide-react';
+import { Eye, EyeOff, Star, AlertCircle } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import AdminTable from '@/components/admin/AdminTable';
 import Modal, { FormField, inputCss } from '@/components/admin/Modal';
@@ -14,6 +14,13 @@ const EMPTY: Partial<Certification> = {
   description: '', overviewMd: '', skills: [], tags: [],
   featured: false, visible: true, order: 0,
 };
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
 
 function joinArr(v: unknown): string {
   return Array.isArray(v) ? (v as string[]).join(', ') : (v as string) || '';
@@ -28,6 +35,8 @@ export default function AdminCerts() {
   const [skillsInput,  setSkillsInput] = useState('');
   const [saving,       setSaving]      = useState(false);
   const [preview,      setPreview]     = useState(false);
+  const [slugManual,   setSlugManual]  = useState(false);
+  const [error,        setError]       = useState<string | null>(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
 
   const load = async () => {
@@ -47,6 +56,8 @@ export default function AdminCerts() {
     setTagsInput('');
     setSkillsInput('');
     setPreview(false);
+    setSlugManual(false);
+    setError(null);
     setModal(true);
   };
 
@@ -55,12 +66,23 @@ export default function AdminCerts() {
     setTagsInput(joinArr(c.tags));
     setSkillsInput(joinArr(c.skills));
     setPreview(false);
+    setSlugManual(true);
+    setError(null);
     setModal(true);
+  };
+
+  const handleTitleChange = (title: string) => {
+    const updated: Partial<Certification> = { ...form, title };
+    if (!slugManual) {
+      updated.slug = slugify(title);
+    }
+    setForm(updated);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError(null);
     const tags   = tagsInput.split(',').map((t) => t.trim()).filter(Boolean);
     const skills = skillsInput.split(',').map((s) => s.trim()).filter(Boolean);
     const payload = {
@@ -74,6 +96,9 @@ export default function AdminCerts() {
       else         await api.post('/certifications', payload, authHeader(token));
       setModal(false);
       load();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Save failed. Please try again.';
+      setError(message);
     } finally { setSaving(false); }
   };
 
@@ -133,13 +158,60 @@ export default function AdminCerts() {
         onSubmit={handleSubmit}
         loading={saving}
       >
+        {/* ── Error feedback ── */}
+        {error && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.75rem 1rem', borderRadius: '9px',
+            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
+            color: '#ef4444', fontSize: '0.82rem', fontWeight: 500,
+          }}>
+            <AlertCircle size={14} style={{ flexShrink: 0 }} />
+            {error}
+          </div>
+        )}
+
         {/* ── Title + Slug ── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
           <FormField label="Title" required>
-            <input style={inputCss} value={form.title || ''} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+            <input style={inputCss} value={form.title || ''} onChange={(e) => handleTitleChange(e.target.value)} required />
           </FormField>
-          <FormField label="Slug" required>
-            <input style={inputCss} value={form.slug || ''} onChange={(e) => setForm({ ...form, slug: e.target.value })} required placeholder="oracle-oci-ai-2025" />
+          <FormField label="Slug">
+            <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
+              <input
+                style={{
+                  ...inputCss,
+                  flex: 1,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.8rem',
+                  color: slugManual ? 'var(--text)' : 'var(--text-3)',
+                  background: slugManual ? 'var(--bg-2)' : 'var(--bg-3)',
+                }}
+                value={form.slug || ''}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                readOnly={!slugManual}
+                placeholder="auto-generated"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (slugManual) {
+                    setForm({ ...form, slug: slugify(form.title || '') });
+                  }
+                  setSlugManual(!slugManual);
+                }}
+                style={{
+                  padding: '0.4rem 0.6rem', borderRadius: '7px', border: '1px solid var(--border)',
+                  background: slugManual ? 'var(--accent-dim)' : 'var(--bg-3)',
+                  color: slugManual ? 'var(--accent)' : 'var(--text-3)',
+                  fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer',
+                  whiteSpace: 'nowrap', transition: 'all 0.15s',
+                }}
+                title={slugManual ? 'Switch to auto-slug' : 'Edit slug manually'}
+              >
+                {slugManual ? 'Auto' : 'Edit'}
+              </button>
+            </div>
           </FormField>
         </div>
 
