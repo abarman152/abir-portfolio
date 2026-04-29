@@ -110,11 +110,11 @@ a:hover { opacity: 0.8; }
 }
 .card:hover {
   border-color: var(--border-2);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.09);
 }
 [data-theme="dark"] .card:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.30);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.28);
 }
 
 /* ─── Mono tag ───────────────────────────────────────────── */
@@ -270,4 +270,31 @@ a[href]:not([href^="#"]):not([href^="mailto"]):not([href^="tel"]) {
 }
 .about-contact-icon:hover .about-contact-tooltip {
   opacity: 1;
+}
+
+/* ─── Navbar icon button hover ───────────────────────────── */
+.nav-icon-btn {
+  transition: transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94),
+              background 0.15s ease,
+              border-color 0.15s ease;
+  will-change: transform;
+}
+.nav-icon-btn:hover {
+  transform: scale(1.08);
+  background: var(--bg-2) !important;
+  border-color: var(--border-2) !important;
+}
+
+/* ─── Image lazy-load fade ───────────────────────────────── */
+img {
+  transition: opacity 0.3s ease;
+}
+
+/* ─── Respect reduced motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

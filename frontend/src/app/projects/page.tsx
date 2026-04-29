@@ -21,7 +21,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: index * 0.06, ease: EASE }}
+      transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.25), ease: EASE }}
       className="card"
       style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
     >

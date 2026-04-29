@@ -53,7 +53,7 @@ export default function Navbar() {
       <motion.nav
         initial={{ y: -72 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.45, ease: 'easeOut' }}
+        transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
           height: '60px',
@@ -138,6 +138,7 @@ export default function Navbar() {
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
+            className="nav-icon-btn"
             style={{
               width: 32, height: 32, borderRadius: '8px',
               background: 'var(--bg-3)', border: '1px solid var(--border)',

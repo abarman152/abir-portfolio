@@ -351,9 +351,9 @@ export default function Hero({ hero, socials }: Props) {
           {/* ── RIGHT — Profile image ────────────────── */}
           <motion.div
             className="hero-photo"
-            initial={{ opacity: 0, x: 32 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.16, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
             style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
           >
             <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
@@ -362,7 +362,7 @@ export default function Hero({ hero, socials }: Props) {
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.4 }}
+                transition={{ delay: 0.42, duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
               >
                 <Badge
                   icon={Brain}
@@ -389,6 +389,7 @@ export default function Hero({ hero, socials }: Props) {
                     src={hero.avatarUrl}
                     alt={hero.name || 'Abir Barman'}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    loading="eager"
                   />
                 ) : (
                   /* Placeholder */
@@ -422,7 +423,7 @@ export default function Hero({ hero, socials }: Props) {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.85, duration: 0.4 }}
+                transition={{ delay: 0.52, duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
               >
                 <Badge
                   icon={FolderOpen}
@@ -435,7 +436,7 @@ export default function Hero({ hero, socials }: Props) {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0, duration: 0.4 }}
+                transition={{ delay: 0.62, duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
               >
                 <Badge
                   icon={BookOpen}

@@ -73,14 +73,16 @@ export default function Stats({ stats }: { stats: Stat[] }) {
                 key={stat.id}
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.03, transition: { duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] } }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.09, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
+                transition={{ duration: 0.35, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
                 style={{
                   padding: '2rem 1.75rem',
                   background: 'var(--bg-card)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                   gap: '0.5rem',
                   transition: 'background 0.2s',
+                  cursor: 'default',
                 }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-3)')}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-card)')}

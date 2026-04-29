@@ -63,9 +63,10 @@ export default function Research({ papers }: { papers: ResearchPaper[] }) {
       <div className="container" style={{ maxWidth: '960px' }}>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
           style={{ marginBottom: '3rem' }}
         >
           <span className="eyebrow">Research & Publications</span>

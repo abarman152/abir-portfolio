@@ -1,10 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { ArrowLeft, GitFork, ExternalLink, Calendar } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Project } from '@/lib/types';
+
+const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 14 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.35, delay, ease: EASE },
+});
 
 export default function ProjectDetail({ project }: { project: Project }) {
   const displayDate =
@@ -30,7 +39,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
           {/* Hero image */}
           {project.imageUrl && (
             <div style={{ height: '320px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-3)', marginBottom: '2.5rem', border: '1px solid var(--border)', position: 'relative' }}>
-              <img src={project.imageUrl} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <img src={project.imageUrl} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
               {project.featured && (
                 <div style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.3rem 0.75rem', borderRadius: '6px', background: 'var(--accent)', color: 'white', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>
                   FEATURED
@@ -79,13 +88,14 @@ export default function ProjectDetail({ project }: { project: Project }) {
           </div>
 
           {/* Tech stack */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '2.5rem' }}>
+          <motion.div {...fadeUp(0.05)} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '2.5rem' }}>
             {(project.techStack ?? []).map((tech) => <span key={tech} className="tag">{tech}</span>)}
-          </div>
+          </motion.div>
 
           {/* Problem / Result */}
           {(project.problem || project.result) && (
-            <div
+            <motion.div
+              {...fadeUp(0.1)}
               style={{ display: 'grid', gridTemplateColumns: project.problem && project.result ? '1fr 1fr' : '1fr', gap: '1rem', marginBottom: '2rem' }}
               className="detail-pr-grid"
             >
@@ -101,31 +111,38 @@ export default function ProjectDetail({ project }: { project: Project }) {
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: 1.75 }}>{project.result}</p>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {/* Overview */}
           {(project.longDesc || project.description) && (
-            <div className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+            <motion.div {...fadeUp(0.12)} className="card" style={{ padding: '2rem', marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem', letterSpacing: '-0.01em' }}>Overview</h2>
               <p style={{ color: 'var(--text-2)', lineHeight: 1.85, fontSize: '0.925rem' }}>
                 {project.longDesc || project.description}
               </p>
-            </div>
+            </motion.div>
           )}
 
           {/* Screenshots */}
           {(project.screenshots ?? []).length > 0 && (
-            <div>
+            <motion.div {...fadeUp(0.14)}>
               <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>Screenshots</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.875rem' }}>
                 {project.screenshots.map((src, i) => (
-                  <div key={i} style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                    <img src={src} alt={`Screenshot ${i + 1}`} style={{ width: '100%', display: 'block' }} />
-                  </div>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.32, delay: i * 0.06, ease: EASE }}
+                    style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)' }}
+                  >
+                    <img src={src} alt={`Screenshot ${i + 1}`} style={{ width: '100%', display: 'block' }} loading="lazy" />
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </main>
