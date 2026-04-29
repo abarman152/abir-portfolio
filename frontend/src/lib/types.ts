@@ -35,6 +35,11 @@ export interface Project {
   isPublished: boolean;
   date: string;
   order: number;
+  bannerImageUrl: string;
+  resultImages: string[];
+  overviewMd: string;
+  problemCharLimit: number;
+  resultCharLimit: number;
   createdAt: string;
 }
 

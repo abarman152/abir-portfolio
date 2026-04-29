@@ -5,7 +5,10 @@
       "Bash(npm install *)",
       "Bash(npx prisma *)",
       "Bash(node -e \"const l = require\\('lucide-react'\\); const keys = Object.keys\\(l\\).filter\\(k => k.toLowerCase\\(\\).includes\\('github'\\) || k.toLowerCase\\(\\).includes\\('linked'\\)\\); console.log\\(keys\\)\")",
-      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\(Object.keys\\(l\\).filter\\(k => k.startsWith\\('Git'\\) || k.startsWith\\('Link'\\) || k.startsWith\\('Globe'\\)\\).slice\\(0,20\\)\\)\")"
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\(Object.keys\\(l\\).filter\\(k => k.startsWith\\('Git'\\) || k.startsWith\\('Link'\\) || k.startsWith\\('Globe'\\)\\).slice\\(0,20\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

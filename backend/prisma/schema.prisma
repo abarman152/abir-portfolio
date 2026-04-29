@@ -45,15 +45,20 @@ model Project {
   result      String   @default("")
   techStack   String[]
   imageUrl    String   @default("")
-  screenshots String[]
-  githubUrl   String   @default("")
-  liveUrl     String   @default("")
-  featured    Boolean  @default(false)
-  isPublished Boolean  @default(true)
-  date        String   @default("")
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  screenshots      String[]
+  githubUrl        String   @default("")
+  liveUrl          String   @default("")
+  featured         Boolean  @default(false)
+  isPublished      Boolean  @default(true)
+  date             String   @default("")
+  order            Int      @default(0)
+  bannerImageUrl   String   @default("")
+  resultImages     String[] @default([])
+  overviewMd       String   @default("")
+  problemCharLimit Int      @default(0)
+  resultCharLimit  Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model ResearchPaper {
