@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft, Calendar, Star, Trophy, GraduationCap, Zap, Users, X, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Star, Trophy, GraduationCap, Zap, Users, X, ChevronLeft, ChevronRight, Building2, Maximize2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Achievement } from '@/lib/types';
@@ -43,7 +43,7 @@ function fmtDate(iso: string): string {
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
       <span style={{ fontSize: '0.66rem', fontWeight: 800, color: 'var(--accent)', background: 'rgba(99,102,241,0.1)', padding: '0.2rem 0.55rem', borderRadius: '4px', letterSpacing: '0.07em', flexShrink: 0 }}>
         {children}
       </span>
@@ -52,60 +52,134 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
-/* ── Lightbox Gallery ──────────────────────────────────────── */
-function ImageGallery({ images, title }: { images: string[]; title: string }) {
-  const [lightbox, setLightbox] = useState<number | null>(null);
+/* ── Sticky Gallery (Right Column) ──────────────────────────── */
+function StickyGallery({ images, title }: { images: string[]; title: string }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [lightbox, setLightbox]   = useState<number | null>(null);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (lightbox === null) return;
+    if (e.key === 'Escape') setLightbox(null);
+    if (e.key === 'ArrowRight') setLightbox((lightbox + 1) % images.length);
+    if (e.key === 'ArrowLeft') setLightbox((lightbox - 1 + images.length) % images.length);
+  }, [lightbox, images.length]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   if (!images.length) return null;
 
   return (
     <>
-      <SectionLabel>GALLERY</SectionLabel>
-      <div style={{ display: 'grid', gridTemplateColumns: images.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-        {images.map((url, i) => (
-          <motion.button
-            key={url}
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.25, delay: i * 0.05, ease: EASE }}
-            onClick={() => setLightbox(i)}
+      <div style={{ position: 'sticky', top: '84px' }}>
+        {/* Hero / main preview image */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1, ease: EASE }}
+          style={{ position: 'relative', marginBottom: '0.75rem' }}
+        >
+          <button
+            onClick={() => setLightbox(activeIdx)}
             style={{
-              padding: 0, border: '1px solid var(--border)', borderRadius: '12px',
+              display: 'block', width: '100%', padding: 0,
+              border: '1px solid var(--border)', borderRadius: '14px',
               overflow: 'hidden', cursor: 'pointer', background: 'var(--bg-2)',
-              aspectRatio: i === 0 && images.length > 1 ? '16/10' : '4/3',
-              gridColumn: i === 0 && images.length > 1 ? 'span 2' : undefined,
-              transition: 'border-color 0.15s',
+              transition: 'border-color 0.2s',
             }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)')}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--border)')}
+            aria-label="View fullscreen"
           >
             <img
-              src={url}
-              alt={`${title} — image ${i + 1}`}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              loading="lazy"
+              key={activeIdx}
+              src={images[activeIdx]}
+              alt={`${title} — image ${activeIdx + 1}`}
+              style={{
+                width: '100%', aspectRatio: '4/3', objectFit: 'cover',
+                display: 'block',
+              }}
             />
-          </motion.button>
-        ))}
+          </button>
+
+          {/* Expand indicator */}
+          <div style={{
+            position: 'absolute', bottom: '0.75rem', right: '0.75rem',
+            width: 32, height: 32, borderRadius: '8px',
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none',
+          }}>
+            <Maximize2 size={14} color="white" />
+          </div>
+        </motion.div>
+
+        {/* Thumbnail grid */}
+        {images.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15, ease: EASE }}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${Math.min(images.length, 4)}, 1fr)`,
+              gap: '0.5rem',
+            }}
+          >
+            {images.map((url, i) => (
+              <button
+                key={url}
+                onClick={() => setActiveIdx(i)}
+                style={{
+                  padding: 0,
+                  border: i === activeIdx ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  background: 'var(--bg-2)',
+                  opacity: i === activeIdx ? 1 : 0.7,
+                  transition: 'opacity 0.15s, border-color 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  if (i !== activeIdx) (e.currentTarget as HTMLElement).style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  if (i !== activeIdx) (e.currentTarget as HTMLElement).style.opacity = '0.7';
+                }}
+                aria-label={`View image ${i + 1}`}
+              >
+                <img
+                  src={url}
+                  alt={`${title} — thumbnail ${i + 1}`}
+                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Image count */}
+        {images.length > 1 && (
+          <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.625rem' }}>
+            {activeIdx + 1} of {images.length} images
+          </p>
+        )}
       </div>
 
-      {/* Lightbox */}
+      {/* ── Fullscreen Lightbox ── */}
       <AnimatePresence>
         {lightbox !== null && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setLightbox(null)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') setLightbox(null);
-              if (e.key === 'ArrowRight') setLightbox((lightbox + 1) % images.length);
-              if (e.key === 'ArrowLeft') setLightbox((lightbox - 1 + images.length) % images.length);
-            }}
-            tabIndex={0}
             style={{
               position: 'fixed', inset: 0, zIndex: 300,
-              background: 'rgba(0,0,0,0.85)',
-              backdropFilter: 'blur(8px)',
+              background: 'rgba(0,0,0,0.9)',
+              backdropFilter: 'blur(12px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
             }}
@@ -115,11 +189,14 @@ function ImageGallery({ images, title }: { images: string[]; title: string }) {
               onClick={() => setLightbox(null)}
               style={{
                 position: 'absolute', top: '1.5rem', right: '1.5rem', zIndex: 301,
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.12)', border: 'none',
+                width: 40, height: 40, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
                 color: 'white', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.15s',
               }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)')}
             >
               <X size={18} />
             </button>
@@ -130,13 +207,16 @@ function ImageGallery({ images, title }: { images: string[]; title: string }) {
                 onClick={(e) => { e.stopPropagation(); setLightbox((lightbox - 1 + images.length) % images.length); }}
                 style={{
                   position: 'absolute', left: '1.5rem', zIndex: 301,
-                  width: 40, height: 40, borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.12)', border: 'none',
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
                   color: 'white', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.15s',
                 }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)')}
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={22} />
               </button>
             )}
 
@@ -163,13 +243,16 @@ function ImageGallery({ images, title }: { images: string[]; title: string }) {
                 onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + 1) % images.length); }}
                 style={{
                   position: 'absolute', right: '1.5rem', zIndex: 301,
-                  width: 40, height: 40, borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.12)', border: 'none',
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
                   color: 'white', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.15s',
                 }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)')}
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={22} />
               </button>
             )}
 
@@ -177,9 +260,9 @@ function ImageGallery({ images, title }: { images: string[]; title: string }) {
             {images.length > 1 && (
               <div style={{
                 position: 'absolute', bottom: '1.5rem',
-                padding: '0.35rem 0.875rem', borderRadius: '20px',
-                background: 'rgba(0,0,0,0.6)', color: 'white',
-                fontSize: '0.82rem', fontWeight: 600,
+                padding: '0.4rem 1rem', borderRadius: '20px',
+                background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white', fontSize: '0.82rem', fontWeight: 600,
               }}>
                 {lightbox + 1} / {images.length}
               </div>
@@ -205,12 +288,12 @@ export default function AchievementDetail({ item }: { item: Achievement }) {
     <>
       <Navbar />
 
-      {/* ── Hero Header ── */}
+      {/* ── Hero Header (full-width) ── */}
       <section style={{
         paddingTop: '60px',
         background: 'var(--bg-2)', borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2.5rem 2rem 3rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2.5rem 2rem 3rem' }}>
           {/* Back link */}
           <motion.div
             initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
@@ -315,72 +398,94 @@ export default function AchievementDetail({ item }: { item: Achievement }) {
         </div>
       </section>
 
-      {/* ── Body Content ── */}
+      {/* ── Split Layout Body ── */}
       <main style={{ background: 'var(--bg)' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem 2rem 4rem' }}>
+        <div style={{
+          maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem 4rem',
+          display: 'grid',
+          gridTemplateColumns: hasImages ? '1fr 380px' : '1fr',
+          gap: '3rem',
+          alignItems: 'start',
+        }}>
 
-          {/* Description */}
-          {hasDescription && !hasOverview && (
+          {/* ── LEFT COLUMN: Content ── */}
+          <div style={{ minWidth: 0 }}>
+
+            {/* Description (only if no overview) */}
+            {hasDescription && !hasOverview && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: EASE }}
+                style={{ marginBottom: '2.5rem' }}
+              >
+                <SectionLabel>ABOUT</SectionLabel>
+                <p style={{ fontSize: '0.95rem', color: 'var(--text-2)', lineHeight: 1.8 }}>
+                  {item.description}
+                </p>
+              </motion.div>
+            )}
+
+            {/* Markdown overview */}
+            {hasOverview && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.05, ease: EASE }}
+                style={{ marginBottom: '2.5rem' }}
+              >
+                <SectionLabel>OVERVIEW</SectionLabel>
+                <Md>{item.overviewMd}</Md>
+              </motion.div>
+            )}
+
+            {/* Details card */}
             <motion.div
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: EASE }}
-              style={{ marginBottom: '2.5rem' }}
+              transition={{ duration: 0.35, delay: 0.1, ease: EASE }}
             >
-              <SectionLabel>ABOUT</SectionLabel>
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-2)', lineHeight: 1.8 }}>
-                {item.description}
-              </p>
-            </motion.div>
-          )}
-
-          {/* Markdown overview */}
-          {hasOverview && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.05, ease: EASE }}
-              style={{ marginBottom: '2.5rem' }}
-            >
-              <SectionLabel>OVERVIEW</SectionLabel>
-              <Md>{item.overviewMd}</Md>
-            </motion.div>
-          )}
-
-          {/* Details sidebar card */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.1, ease: EASE }}
-            style={{ marginBottom: '2.5rem' }}
-          >
-            <SectionLabel>DETAILS</SectionLabel>
-            <div className="card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem' }}>
-              {item.issuer && (
+              <SectionLabel>DETAILS</SectionLabel>
+              <div className="card" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1.25rem' }}>
+                {item.issuer && (
+                  <div>
+                    <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>ORGANIZATION</p>
+                    <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>{item.issuer}</p>
+                  </div>
+                )}
                 <div>
-                  <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>ORGANIZATION</p>
-                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>{item.issuer}</p>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>CATEGORY</p>
+                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color }}>{item.category}</p>
                 </div>
-              )}
-              <div>
-                <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>CATEGORY</p>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600, color }}>{item.category}</p>
+                <div>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>DATE</p>
+                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>{fmtDate(item.date)}</p>
+                </div>
               </div>
-              <div>
-                <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>DATE</p>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>{fmtDate(item.date)}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Image Gallery */}
-          {hasImages && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.15, ease: EASE }}
-            >
-              <ImageGallery images={item.images} title={item.title} />
             </motion.div>
+          </div>
+
+          {/* ── RIGHT COLUMN: Sticky Gallery ── */}
+          {hasImages && (
+            <StickyGallery images={item.images} title={item.title} />
           )}
         </div>
       </main>
+
+      {/* ── Responsive: mobile gallery-first reorder ── */}
+      <style>{`
+        @media (max-width: 768px) {
+          main > div {
+            grid-template-columns: 1fr !important;
+          }
+          main > div > div:last-child {
+            order: -1;
+          }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+          main > div {
+            grid-template-columns: 1fr 320px !important;
+            gap: 2rem !important;
+          }
+        }
+      `}</style>
 
       <Footer />
     </>
