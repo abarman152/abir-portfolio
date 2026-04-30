@@ -56,8 +56,8 @@ const DEFAULT_SKILL_GROUPS: AboutSkillGroup[] = [
 ];
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: 'a1', title: 'International Best Researcher Award', description: 'Recognized at the Asia Research Award 2025 for outstanding contributions to data science and analytics research at an international level.', date: '2025-01-01', issuer: 'Asia Research Award 2025', imageUrl: '', type: 'Award', tags: ['Research', 'International'], featured: true, visible: true, order: 1 },
-  { id: 'a2', title: 'Membership, American Chamber of Research', description: 'Inducted as a member recognizing contributions to research and innovation in computer science and data analytics.', date: '2025-01-01', issuer: 'American Chamber of Research', imageUrl: '', type: 'Professional', tags: ['Research', 'Membership'], featured: false, visible: true, order: 2 },
+  { id: 'a1', slug: 'intl-best-researcher-award', title: 'International Best Researcher Award', description: 'Recognized at the Asia Research Award 2025 for outstanding contributions to data science and analytics research at an international level.', overviewMd: '', date: '2025-01-01', issuer: 'Asia Research Award 2025', imageUrl: '', badgeIcon: '', images: [], category: 'Award', tags: ['Research', 'International'], featured: true, visible: true, order: 1, createdAt: '', updatedAt: '' },
+  { id: 'a2', slug: 'american-chamber-of-research', title: 'Membership, American Chamber of Research', description: 'Inducted as a member recognizing contributions to research and innovation in computer science and data analytics.', overviewMd: '', date: '2025-01-01', issuer: 'American Chamber of Research', imageUrl: '', badgeIcon: '', images: [], category: 'Professional', tags: ['Research', 'Membership'], featured: false, visible: true, order: 2, createdAt: '', updatedAt: '' },
 ];
 
 export default async function AboutPage() {
@@ -65,7 +65,7 @@ export default async function AboutPage() {
     safe<AboutProfile>(`${API}/about/profile`, DEFAULT_PROFILE),
     safe<Education[]>(`${API}/about/education`, DEFAULT_EDUCATION),
     safe<AboutSkillGroup[]>(`${API}/about/skills`, DEFAULT_SKILL_GROUPS),
-    safe<Achievement[]>(`${API}/achievements`, DEFAULT_ACHIEVEMENTS),
+    safe<Achievement[]>(`${API}/achievements/featured`, DEFAULT_ACHIEVEMENTS),
   ]);
 
   const visibleAchievements = achievements.filter(a => a.visible);

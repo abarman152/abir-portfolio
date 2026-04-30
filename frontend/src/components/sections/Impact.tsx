@@ -132,10 +132,10 @@ export default function Impact({ achievements, stats }: { achievements: Achievem
                 >
                   <div style={{
                     width: 34, height: 34, borderRadius: '9px', flexShrink: 0,
-                    background: a.type === 'Award' ? '#f59e0b15' : 'var(--accent-dim)',
+                    background: a.category === 'Award' ? '#f59e0b15' : 'var(--accent-dim)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Trophy size={15} style={{ color: a.type === 'Award' ? '#f59e0b' : 'var(--accent)' }} />
+                    <Trophy size={15} style={{ color: a.category === 'Award' ? '#f59e0b' : 'var(--accent)' }} />
                   </div>
                   <div>
                     <p style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>{a.title}</p>

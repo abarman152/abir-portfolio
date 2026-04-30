@@ -104,12 +104,16 @@ model Certification {
 
 model Achievement {
   id          String   @id @default(cuid())
+  slug        String?  @unique
   title       String
   description String   @default("")
+  overviewMd  String   @default("")
   date        DateTime
   issuer      String   @default("")
   imageUrl    String   @default("")
-  type        String   @default("Award")
+  badgeIcon   String   @default("")
+  images      String[] @default([])
+  category    String   @default("Award")
   tags        String[] @default([])
   featured    Boolean  @default(false)
   visible     Boolean  @default(true)

@@ -13,7 +13,7 @@ const navLinks = [
   { href: '/projects',       label: 'Projects' },
   { href: '/research',       label: 'Research' },
   { href: '/certifications', label: 'Certifications' },
-  { href: '/#achievements',  label: 'Achievements' },
+  { href: '/achievements',   label: 'Achievements' },
   { href: '/#contact',       label: 'Contact' },
 ];
 
@@ -46,6 +46,7 @@ export default function Navbar() {
     if (href === '/projects') return pathname.startsWith('/projects');
     if (href === '/research') return pathname.startsWith('/research');
     if (href === '/certifications') return pathname.startsWith('/certifications');
+    if (href === '/achievements') return pathname.startsWith('/achievements');
     if (href.startsWith('/#')) return pathname === '/' && activeSection === href.slice(2);
     return false;
   };

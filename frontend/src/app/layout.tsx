@@ -16,6 +16,22 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+
+async function getDefaultTheme(): Promise<'dark' | 'light'> {
+  try {
+    const res = await fetch(`${API}/settings`, {
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return 'dark';
+    const data = await res.json();
+    return data?.defaultTheme === 'light' ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
 export const metadata: Metadata = {
   title: 'Abir Barman — Data Scientist',
   description: 'Data Scientist and ML Engineer building intelligent systems that turn data into real-world impact.',
@@ -26,11 +42,24 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `(function(){try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const dbDefault = await getDefaultTheme();
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // CRITICAL: Set data-theme on <html> SERVER-SIDE so the first paint is correct.
+  // Without this, the HTML arrives without data-theme → CSS defaults to :root (light)
+  // → visible flash before the inline script runs.
+  //
+  // The inline script then overrides with localStorage if the user has toggled before.
+  // Priority: localStorage > system preference > DB default
+  const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t&&t!==document.documentElement.getAttribute('data-theme')){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      data-theme={dbDefault}
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
