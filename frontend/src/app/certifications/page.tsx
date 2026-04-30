@@ -47,8 +47,8 @@ function CertCard({ cert, index }: { cert: Certification; index: number }) {
             background: cert.featured ? '#f59e0b12' : 'var(--accent-dim)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            {cert.imageUrl
-              ? <img src={cert.imageUrl} alt={cert.issuer} style={{ width: 26, height: 26, objectFit: 'contain' }} loading="lazy" />
+            {cert.badgeImageUrl
+              ? <img src={cert.badgeImageUrl} alt={cert.issuer} style={{ width: 26, height: 26, objectFit: 'contain' }} loading="lazy" />
               : <Award size={20} style={{ color: cert.featured ? '#f59e0b' : 'var(--accent)' }} />
             }
           </div>
