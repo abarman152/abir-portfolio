@@ -65,7 +65,7 @@ export default async function AboutPage() {
     safe<AboutProfile>(`${API}/about/profile`, DEFAULT_PROFILE),
     safe<Education[]>(`${API}/about/education`, DEFAULT_EDUCATION),
     safe<AboutSkillGroup[]>(`${API}/about/skills`, DEFAULT_SKILL_GROUPS),
-    safe<Achievement[]>(`${API}/achievements`, DEFAULT_ACHIEVEMENTS),
+    safe<Achievement[]>(`${API}/achievements/featured`, DEFAULT_ACHIEVEMENTS),
   ]);
 
   const visibleAchievements = achievements.filter(a => a.visible);
