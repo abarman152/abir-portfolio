@@ -8,6 +8,17 @@ export interface HeroContent {
   avatarUrl: string;
 }
 
+export interface HeroBadge {
+  id: string;
+  label: string;
+  position: string;
+  icon: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SocialLink {
   id: string;
   platform: string;
@@ -149,6 +160,18 @@ export interface Stat {
   order: number;
 }
 
+export interface HeroConfig {
+  backgroundType: 'gradient' | 'image';
+  backgroundValue: string;
+  profileImage: string;
+  themeImages: {
+    light?: string;
+    dark?: string;
+  };
+  overlayStyle?: string;
+  linkedMode: boolean;
+}
+
 export interface SiteSettings {
   id: string;
   defaultTheme: string;
@@ -156,6 +179,7 @@ export interface SiteSettings {
   metaTitle: string;
   metaDesc: string;
   ogImageUrl: string;
+  heroConfig: HeroConfig;
 }
 
 export interface AboutProfile {

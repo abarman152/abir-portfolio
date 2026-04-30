@@ -157,6 +157,18 @@ model SiteSettings {
   metaTitle    String @default("Abir Barman | Data Scientist")
   metaDesc     String @default("Portfolio of Abir Barman - Data Scientist & Full Stack Developer")
   ogImageUrl   String @default("")
+  heroConfig   Json   @default("{\"backgroundType\":\"gradient\",\"backgroundValue\":\"\",\"profileImage\":\"\",\"themeImages\":{},\"overlayStyle\":\"\",\"linkedMode\":true}")
+}
+
+model HeroBadge {
+  id        String   @id @default(cuid())
+  label     String
+  position  String   @default("top-right")
+  icon      String   @default("")
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model AboutProfile {
