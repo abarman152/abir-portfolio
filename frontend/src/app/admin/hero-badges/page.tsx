@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import AdminTable from '@/components/admin/AdminTable';
@@ -15,26 +15,43 @@ const EMPTY: Partial<HeroBadge> = {
   label: '', position: 'top-right', icon: 'Brain', isActive: true, order: 0,
 };
 
+function getToken(): string {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('admin_token') || '';
+}
+
 export default function AdminHeroBadges() {
   const [items,   setItems]   = useState<HeroBadge[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal,   setModal]   = useState(false);
   const [form,    setForm]    = useState<Partial<HeroBadge>>(EMPTY);
   const [saving,  setSaving]  = useState(false);
-  const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
+  const [error,   setError]   = useState('');
+  const [success, setSuccess] = useState('');
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await api.get<HeroBadge[]>('/hero-badges/all', authHeader(token));
-      setItems(data);
-    } finally { setLoading(false); }
+  const flash = (msg: string) => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(''), 2500);
   };
 
-  useEffect(() => { load(); }, []);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await api.get<HeroBadge[]>('/hero-badges/all', authHeader(getToken()));
+      setItems(data);
+    } catch (err) {
+      console.error('Failed to load hero badges:', err);
+      setError('Failed to load badges. Check if the backend is running.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const openAdd = () => {
-    setForm(EMPTY);
+    setForm({ ...EMPTY });
     setModal(true);
   };
 
@@ -46,6 +63,7 @@ export default function AdminHeroBadges() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError('');
     const payload = {
       label: form.label,
       position: form.position,
@@ -54,25 +72,69 @@ export default function AdminHeroBadges() {
       order: Number(form.order) || 0,
     };
     try {
-      if (form.id) await api.put(`/hero-badges/${form.id}`, payload, authHeader(token));
-      else         await api.post('/hero-badges', payload, authHeader(token));
+      if (form.id) {
+        await api.put(`/hero-badges/${form.id}`, payload, authHeader(getToken()));
+        flash('Badge updated!');
+      } else {
+        await api.post('/hero-badges', payload, authHeader(getToken()));
+        flash('Badge created!');
+      }
       setModal(false);
-      load();
-    } finally { setSaving(false); }
+      await load();
+    } catch (err) {
+      console.error('Save failed:', err);
+      setError(`Save failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await api.delete(`/hero-badges/${id}`, authHeader(token));
-    load();
+    setError('');
+    try {
+      await api.delete(`/hero-badges/${id}`, authHeader(getToken()));
+      flash('Badge deleted');
+      await load();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      setError(`Delete failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   const toggleActive = async (item: HeroBadge) => {
-    await api.patch(`/hero-badges/${item.id}/toggle`, {}, authHeader(token));
-    load();
+    setError('');
+    try {
+      await api.patch(`/hero-badges/${item.id}/toggle`, {}, authHeader(getToken()));
+      flash(`Badge ${item.isActive ? 'deactivated' : 'activated'}`);
+      await load();
+    } catch (err) {
+      console.error('Toggle failed:', err);
+      setError(`Toggle failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
 
   return (
     <AdminShell>
+      {/* Success / Error banners */}
+      {success && (
+        <div style={{
+          padding: '0.6rem 1rem', borderRadius: '10px', marginBottom: '1rem',
+          background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)',
+          color: '#10b981', fontSize: '0.85rem', fontWeight: 600,
+        }}>
+          ✓ {success}
+        </div>
+      )}
+      {error && (
+        <div style={{
+          padding: '0.6rem 1rem', borderRadius: '10px', marginBottom: '1rem',
+          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+          color: '#ef4444', fontSize: '0.85rem', fontWeight: 600,
+        }}>
+          ✕ {error}
+        </div>
+      )}
+
       <AdminTable
         title="Hero Badges"
         data={items}
@@ -96,7 +158,7 @@ export default function AdminHeroBadges() {
             key: 'isActive', label: 'Active',
             render: (b) => (
               <button
-                onClick={() => toggleActive(b)}
+                onClick={(e) => { e.stopPropagation(); toggleActive(b); }}
                 title={b.isActive ? 'Click to deactivate' : 'Click to activate'}
                 style={{
                   width: 28, height: 28, borderRadius: '7px', border: 'none', cursor: 'pointer',

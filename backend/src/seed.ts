@@ -126,7 +126,7 @@ async function main() {
           description: 'Recognized at the Asia Research Award 2025 for outstanding contributions to data science and analytics research at an international level.',
           date: new Date('2025-01-01'),
           issuer: 'Asia Research Award 2025',
-          type: 'Award',
+          category: 'Award',
           tags: ['Research', 'International', 'Data Science'],
           featured: true,
           visible: true,
@@ -137,7 +137,7 @@ async function main() {
           description: 'Inducted as a member recognizing contributions to research and innovation in computer science and data analytics.',
           date: new Date('2025-01-01'),
           issuer: 'American Chamber of Research',
-          type: 'Professional',
+          category: 'Professional',
           tags: ['Research', 'Membership', 'Professional'],
           featured: false,
           visible: true,
@@ -310,6 +310,18 @@ async function main() {
         { category: 'Databases', skills: ['PostgreSQL', 'RDBMS fundamentals'], order: 4, visible: true },
         { category: 'Development Tools', skills: ['Git', 'GitHub'], order: 5, visible: true },
         { category: 'Core Competencies', skills: ['Data Analysis', 'Reporting', 'Automation', 'Problem Solving', 'Attention to Detail'], order: 6, visible: true },
+      ],
+    });
+  }
+
+  // Hero Badges
+  const heroBadgesExist = await prisma.heroBadge.count();
+  if (!heroBadgesExist) {
+    await prisma.heroBadge.createMany({
+      data: [
+        { label: 'AI / ML Systems',  position: 'top-right',    icon: 'Brain',      isActive: true, order: 0 },
+        { label: '40+ Projects',     position: 'bottom-left',  icon: 'FolderOpen', isActive: true, order: 1 },
+        { label: 'Research Work',    position: 'bottom-right', icon: 'BookOpen',   isActive: true, order: 2 },
       ],
     });
   }
