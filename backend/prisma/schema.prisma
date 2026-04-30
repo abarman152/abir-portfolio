@@ -157,6 +157,7 @@ model SiteSettings {
   metaTitle    String @default("Abir Barman | Data Scientist")
   metaDesc     String @default("Portfolio of Abir Barman - Data Scientist & Full Stack Developer")
   ogImageUrl   String @default("")
+  heroConfig   Json   @default("{\"backgroundType\":\"gradient\",\"backgroundValue\":\"\",\"profileImage\":\"\",\"themeImages\":{},\"overlayStyle\":\"\",\"linkedMode\":true}")
 }
 
 model HeroBadge {

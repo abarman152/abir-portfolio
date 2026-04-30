@@ -11,7 +11,7 @@ import Contact from '@/components/sections/Contact';
 import Footer from '@/components/Footer';
 import type {
   HeroContent, SocialLink, HeroBadge, Project, Research as ResearchItem,
-  Certification, Achievement, Skill, Stat,
+  Certification, Achievement, Skill, Stat, SiteSettings, HeroConfig,
 } from '@/lib/types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
@@ -42,13 +42,32 @@ const DEFAULT_HERO: HeroContent = {
   avatarUrl: '',
 };
 
+const DEFAULT_HERO_CONFIG: HeroConfig = {
+  backgroundType: 'gradient',
+  backgroundValue: '',
+  profileImage: '',
+  themeImages: {},
+  linkedMode: true,
+};
+
+const DEFAULT_SETTINGS: SiteSettings = {
+  id: '',
+  defaultTheme: 'dark',
+  accentColor: '#6366f1',
+  metaTitle: 'Abir Barman | Data Scientist',
+  metaDesc: 'Portfolio of Abir Barman - Data Scientist & Full Stack Developer',
+  ogImageUrl: '',
+  heroConfig: DEFAULT_HERO_CONFIG,
+};
+
 const DEFAULT_CERTS: Certification[] = [];
 
 export default async function HomePage() {
-  const [hero, socials, heroBadges, projects, papers, skills, certs, achievements, stats] = await Promise.all([
+  const [hero, socials, heroBadges, settings, projects, papers, skills, certs, achievements, stats] = await Promise.all([
     fetchData<HeroContent>('/hero', DEFAULT_HERO),
     fetchData<SocialLink[]>('/social', []),
     fetchData<HeroBadge[]>('/hero-badges', []),
+    fetchData<SiteSettings>('/settings', DEFAULT_SETTINGS),
     fetchData<Project[]>('/projects/featured', []),
     fetchData<ResearchItem[]>('/research/featured', []),
     fetchData<Skill[]>('/skills', []),
@@ -62,7 +81,7 @@ export default async function HomePage() {
       <Navbar />
       <main>
         {/* 1. Hero */}
-        <Hero hero={hero} socials={socials} badges={heroBadges} />
+        <Hero hero={hero} socials={socials} badges={heroBadges} heroConfig={settings.heroConfig} />
 
         {/* 2. About Me */}
         <About />

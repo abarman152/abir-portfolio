@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Download, MapPin, Brain, FolderOpen, BookOpen, Star, Trophy, Zap, Award, GraduationCap, Code2 } from 'lucide-react';
-import type { HeroContent, SocialLink, HeroBadge } from '@/lib/types';
+import { useTheme } from '@/components/ThemeProvider';
+import type { HeroContent, SocialLink, HeroBadge, HeroConfig } from '@/lib/types';
 
 /* ─── Brand SVG icons ─────────────────────────────────────────── */
 function GitHubIcon({ size = 18 }: { size?: number }) {
@@ -103,13 +104,38 @@ const DEFAULT_BADGES: HeroBadge[] = [
 ];
 
 /* ─── Hero ────────────────────────────────────────────────────── */
-interface Props { hero: HeroContent; socials: SocialLink[]; badges?: HeroBadge[] }
+interface Props { hero: HeroContent; socials: SocialLink[]; badges?: HeroBadge[]; heroConfig?: HeroConfig }
 
-export default function Hero({ hero, socials, badges }: Props) {
+export default function Hero({ hero, socials, badges, heroConfig }: Props) {
+  const { theme } = useTheme();
   const resolveIcon = (s: SocialLink): React.ElementType =>
     SOCIAL_ICON[s.platform] || SOCIAL_ICON[s.icon] || GitHubIcon;
 
   const activeBadges = (badges && badges.length > 0) ? badges : DEFAULT_BADGES;
+
+  /* ── Theme-aware profile image (fallback chain) ── */
+  const resolvedHeroImage =
+    (theme === 'dark'
+      ? heroConfig?.themeImages?.dark
+      : heroConfig?.themeImages?.light)
+    || heroConfig?.profileImage
+    || hero.avatarUrl;
+
+  /* ── Background from heroConfig ── */
+  const heroBgStyle: React.CSSProperties =
+    heroConfig?.backgroundType === 'image' && heroConfig.backgroundValue
+      ? {
+          backgroundImage: `url(${heroConfig.backgroundValue})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }
+      : {};
+
+  /* ── If gradient value set, use it as a CSS class-like override ── */
+  const heroBgInline: React.CSSProperties =
+    heroConfig?.backgroundType === 'gradient' && heroConfig.backgroundValue
+      ? { background: heroConfig.backgroundValue }
+      : { background: 'var(--bg)' };
 
   const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
   const item = (delay: number) => ({
@@ -125,7 +151,8 @@ export default function Hero({ hero, socials, badges }: Props) {
         minHeight: '100vh',
         display: 'flex', alignItems: 'center',
         paddingTop: '60px',
-        background: 'var(--bg)',
+        ...heroBgInline,
+        ...heroBgStyle,
       }}
     >
       <div
@@ -409,9 +436,9 @@ export default function Hero({ hero, socials, badges }: Props) {
                   position: 'relative',
                 }}
               >
-                {hero.avatarUrl ? (
+                {resolvedHeroImage ? (
                   <img
-                    src={hero.avatarUrl}
+                    src={resolvedHeroImage}
                     alt={hero.name || 'Abir Barman'}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     loading="eager"
