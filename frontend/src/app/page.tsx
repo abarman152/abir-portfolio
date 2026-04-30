@@ -10,7 +10,7 @@ import Achievements from '@/components/sections/Achievements';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/Footer';
 import type {
-  HeroContent, SocialLink, Project, Research as ResearchItem,
+  HeroContent, SocialLink, HeroBadge, Project, Research as ResearchItem,
   Certification, Achievement, Skill, Stat,
 } from '@/lib/types';
 
@@ -45,9 +45,10 @@ const DEFAULT_HERO: HeroContent = {
 const DEFAULT_CERTS: Certification[] = [];
 
 export default async function HomePage() {
-  const [hero, socials, projects, papers, skills, certs, achievements, stats] = await Promise.all([
+  const [hero, socials, heroBadges, projects, papers, skills, certs, achievements, stats] = await Promise.all([
     fetchData<HeroContent>('/hero', DEFAULT_HERO),
     fetchData<SocialLink[]>('/social', []),
+    fetchData<HeroBadge[]>('/hero-badges', []),
     fetchData<Project[]>('/projects/featured', []),
     fetchData<ResearchItem[]>('/research/featured', []),
     fetchData<Skill[]>('/skills', []),
@@ -61,7 +62,7 @@ export default async function HomePage() {
       <Navbar />
       <main>
         {/* 1. Hero */}
-        <Hero hero={hero} socials={socials} />
+        <Hero hero={hero} socials={socials} badges={heroBadges} />
 
         {/* 2. About Me */}
         <About />

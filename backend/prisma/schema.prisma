@@ -159,6 +159,17 @@ model SiteSettings {
   ogImageUrl   String @default("")
 }
 
+model HeroBadge {
+  id        String   @id @default(cuid())
+  label     String
+  position  String   @default("top-right")
+  icon      String   @default("")
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model AboutProfile {
   id               String   @id @default(cuid())
   name             String   @default("Abir Barman")

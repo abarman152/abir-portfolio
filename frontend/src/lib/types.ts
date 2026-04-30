@@ -8,6 +8,17 @@ export interface HeroContent {
   avatarUrl: string;
 }
 
+export interface HeroBadge {
+  id: string;
+  label: string;
+  position: string;
+  icon: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SocialLink {
   id: string;
   platform: string;

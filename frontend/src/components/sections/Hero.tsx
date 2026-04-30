@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, MapPin, Brain, FolderOpen, BookOpen } from 'lucide-react';
-import type { HeroContent, SocialLink } from '@/lib/types';
+import { ArrowRight, Download, MapPin, Brain, FolderOpen, BookOpen, Star, Trophy, Zap, Award, GraduationCap, Code2 } from 'lucide-react';
+import type { HeroContent, SocialLink, HeroBadge } from '@/lib/types';
 
 /* ─── Brand SVG icons ─────────────────────────────────────────── */
 function GitHubIcon({ size = 18 }: { size?: number }) {
@@ -49,7 +49,20 @@ const SOCIAL_ICON: Record<string, React.ElementType> = {
   Codeforces:  CodeforcesIcon,
 };
 
-/* ─── Floating badge component ────────────────────────────────── */
+/* ─── Icon name → Lucide component map (for dynamic badges) ──── */
+const ICON_MAP: Record<string, React.ElementType> = {
+  Brain, FolderOpen, BookOpen, Star, Trophy, Zap, Award, GraduationCap, Code2,
+};
+
+/* ─── Position → CSS offset map ──────────────────────────────── */
+const POSITION_STYLE: Record<string, React.CSSProperties> = {
+  'top-right':    { top: -14, right: -20 },
+  'top-left':     { top: -14, left: -20 },
+  'bottom-left':  { bottom: 28, left: -20 },
+  'bottom-right': { bottom: -14, right: 24 },
+};
+
+/* ─── Floating badge component (preserved original styling) ──── */
 function Badge({
   icon: Icon,
   label,
@@ -82,12 +95,21 @@ function Badge({
   );
 }
 
-/* ─── Hero ────────────────────────────────────────────────────── */
-interface Props { hero: HeroContent; socials: SocialLink[] }
+/* ─── Default badges (fallback when DB is empty) ─────────────── */
+const DEFAULT_BADGES: HeroBadge[] = [
+  { id: 'f1', label: 'AI / ML Systems',  position: 'top-right',    icon: 'Brain',      isActive: true, order: 0, createdAt: '', updatedAt: '' },
+  { id: 'f2', label: '40+ Projects',     position: 'bottom-left',  icon: 'FolderOpen', isActive: true, order: 1, createdAt: '', updatedAt: '' },
+  { id: 'f3', label: 'Research Work',    position: 'bottom-right', icon: 'BookOpen',   isActive: true, order: 2, createdAt: '', updatedAt: '' },
+];
 
-export default function Hero({ hero, socials }: Props) {
+/* ─── Hero ────────────────────────────────────────────────────── */
+interface Props { hero: HeroContent; socials: SocialLink[]; badges?: HeroBadge[] }
+
+export default function Hero({ hero, socials, badges }: Props) {
   const resolveIcon = (s: SocialLink): React.ElementType =>
     SOCIAL_ICON[s.platform] || SOCIAL_ICON[s.icon] || GitHubIcon;
+
+  const activeBadges = (badges && badges.length > 0) ? badges : DEFAULT_BADGES;
 
   const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
   const item = (delay: number) => ({
@@ -358,18 +380,21 @@ export default function Hero({ hero, socials }: Props) {
           >
             <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
 
-              {/* ── Floating badge — top right ───────── */}
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.42, duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
-              >
-                <Badge
-                  icon={Brain}
-                  label="AI / ML Systems"
-                  style={{ top: -14, right: -20 }}
-                />
-              </motion.div>
+              {/* ── Dynamic floating badges ────────────── */}
+              {activeBadges.map((b, i) => {
+                const IconComp = ICON_MAP[b.icon] || Brain;
+                const posStyle = POSITION_STYLE[b.position] || POSITION_STYLE['top-right'];
+                return (
+                  <motion.div
+                    key={b.id}
+                    initial={{ opacity: 0, y: b.position.startsWith('top') ? -8 : 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.42 + i * 0.1, duration: 0.32, ease: EASE }}
+                  >
+                    <Badge icon={IconComp} label={b.label} style={posStyle} />
+                  </motion.div>
+                );
+              })}
 
               {/* ── Photo frame ─────────────────────── */}
               <div
@@ -418,32 +443,6 @@ export default function Hero({ hero, socials }: Props) {
                   </div>
                 )}
               </div>
-
-              {/* ── Floating badge — bottom left ─────── */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.52, duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
-              >
-                <Badge
-                  icon={FolderOpen}
-                  label="40+ Projects"
-                  style={{ bottom: 28, left: -20 }}
-                />
-              </motion.div>
-
-              {/* ── Floating badge — bottom right ────── */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.62, duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
-              >
-                <Badge
-                  icon={BookOpen}
-                  label="Research Work"
-                  style={{ bottom: -14, right: 24 }}
-                />
-              </motion.div>
             </div>
           </motion.div>
         </div>
