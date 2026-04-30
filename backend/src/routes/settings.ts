@@ -5,7 +5,7 @@ import { authenticate } from '../middleware/auth';
 const router = Router();
 
 const DEFAULT_HERO_CONFIG = {
-  backgroundType: 'gradient' as const,
+  backgroundType: 'gradient' as 'gradient' | 'image',
   backgroundValue: '',
   profileImage: '',
   themeImages: {} as Record<string, string>,
