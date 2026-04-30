@@ -44,39 +44,44 @@ router.get('/', async (_, res) => {
 });
 
 router.put('/', authenticate, async (req, res) => {
-  const { heroConfig: rawHeroConfig, ...rest } = req.body;
+  try {
+    const { heroConfig: rawHeroConfig, id: _id, ...rest } = req.body;
 
-  let heroConfig: typeof DEFAULT_HERO_CONFIG | undefined;
-  if (rawHeroConfig) {
-    heroConfig = ensureHeroConfig(rawHeroConfig);
+    let heroConfig: typeof DEFAULT_HERO_CONFIG | undefined;
+    if (rawHeroConfig) {
+      heroConfig = ensureHeroConfig(rawHeroConfig);
 
-    if (heroConfig.linkedMode) {
-      const resolvedProfile =
-        heroConfig.themeImages?.dark ||
-        heroConfig.profileImage;
-      if (resolvedProfile) {
-        heroConfig.profileImage = resolvedProfile;
+      if (heroConfig.linkedMode) {
+        const resolvedProfile =
+          heroConfig.themeImages?.dark ||
+          heroConfig.profileImage;
+        if (resolvedProfile) {
+          heroConfig.profileImage = resolvedProfile;
+        }
       }
     }
-  }
 
-  const data: Record<string, unknown> = { ...rest };
-  if (heroConfig) {
-    data.heroConfig = heroConfig;
-  }
+    const data: Record<string, unknown> = { ...rest };
+    if (heroConfig) {
+      data.heroConfig = heroConfig;
+    }
 
-  const existing = await prisma.siteSettings.findFirst();
-  if (existing) {
-    const updated = await prisma.siteSettings.update({
-      where: { id: existing.id },
-      data,
-    });
-    const safe = ensureHeroConfig(updated.heroConfig);
-    return res.json({ ...updated, heroConfig: safe });
+    const existing = await prisma.siteSettings.findFirst();
+    if (existing) {
+      const updated = await prisma.siteSettings.update({
+        where: { id: existing.id },
+        data,
+      });
+      const safe = ensureHeroConfig(updated.heroConfig);
+      return res.json({ ...updated, heroConfig: safe });
+    }
+    const created = await prisma.siteSettings.create({ data });
+    const safe = ensureHeroConfig(created.heroConfig);
+    res.json({ ...created, heroConfig: safe });
+  } catch (error) {
+    console.error('Settings PUT error:', error);
+    res.status(500).json({ error: 'Failed to save settings' });
   }
-  const created = await prisma.siteSettings.create({ data });
-  const safe = ensureHeroConfig(created.heroConfig);
-  res.json({ ...created, heroConfig: safe });
 });
 
 export default router;

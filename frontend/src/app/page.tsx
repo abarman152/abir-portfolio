@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 async function fetchData<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API}${path}`, {
-      next: { revalidate: 60 },
+      cache: 'no-store',
       signal: AbortSignal.timeout(BUILD_FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return fallback;

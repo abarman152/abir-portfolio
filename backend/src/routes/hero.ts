@@ -22,13 +22,19 @@ router.get('/', async (_, res) => {
 });
 
 router.put('/', authenticate, async (req, res) => {
-  const existing = await prisma.heroContent.findFirst();
-  if (existing) {
-    const updated = await prisma.heroContent.update({ where: { id: existing.id }, data: req.body });
-    return res.json(updated);
+  try {
+    const { id: _id, updatedAt: _ts, ...data } = req.body;
+    const existing = await prisma.heroContent.findFirst();
+    if (existing) {
+      const updated = await prisma.heroContent.update({ where: { id: existing.id }, data });
+      return res.json(updated);
+    }
+    const created = await prisma.heroContent.create({ data });
+    res.json(created);
+  } catch (error) {
+    console.error('Hero PUT error:', error);
+    res.status(500).json({ error: 'Failed to save hero content' });
   }
-  const created = await prisma.heroContent.create({ data: req.body });
-  res.json(created);
 });
 
 export default router;

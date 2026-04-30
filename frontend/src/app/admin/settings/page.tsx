@@ -22,6 +22,7 @@ export default function AdminSettings() {
   const [heroConfig, setHeroConfig] = useState<HeroConfig>(DEFAULT_HERO_CONFIG);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
 
   useEffect(() => {
@@ -41,14 +42,19 @@ export default function AdminSettings() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError('');
     try {
-      const { heroConfig: _drop, ...settingsRest } = settings;
+      const { heroConfig: _drop, id: _id, ...settingsRest } = settings as Record<string, unknown>;
       await Promise.all([
         api.put('/settings', { ...settingsRest, heroConfig }, authHeader(token)),
         api.put('/hero', hero, authHeader(token)),
       ]);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Save failed';
+      setError(msg);
+      console.error('Settings save error:', err);
     } finally { setSaving(false); }
   };
 
@@ -132,6 +138,17 @@ export default function AdminSettings() {
         </div>
 
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Error banner */}
+          {error && (
+            <div style={{
+              padding: '0.875rem 1.25rem', borderRadius: '12px',
+              background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+              color: '#ef4444', fontSize: '0.875rem', fontWeight: 500,
+            }}>
+              ⚠ {error}
+            </div>
+          )}
+
           {/* Hero Content */}
           <div style={cardStyle}>
             <h2 style={sectionTitle}>Hero Content</h2>
