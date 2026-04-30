@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
-async function getDefaultTheme(): Promise<string> {
+async function getDefaultTheme(): Promise<'dark' | 'light'> {
   try {
     const res = await fetch(`${API}/settings`, {
       next: { revalidate: 300 },
@@ -26,7 +26,7 @@ async function getDefaultTheme(): Promise<string> {
     });
     if (!res.ok) return 'dark';
     const data = await res.json();
-    return data?.defaultTheme || 'dark';
+    return data?.defaultTheme === 'light' ? 'light' : 'dark';
   } catch {
     return 'dark';
   }
@@ -45,14 +45,21 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const dbDefault = await getDefaultTheme();
 
-  // The inline script runs BEFORE hydration:
-  // 1. If user has a localStorage preference → use that
-  // 2. If system prefers dark → use 'dark'
-  // 3. Otherwise → use the DB-configured default theme
-  const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);return;}var d='${dbDefault}';if(window.matchMedia){var m=window.matchMedia('(prefers-color-scheme:dark)');if(m.matches){d='dark';}else if(window.matchMedia('(prefers-color-scheme:light)').matches){d='light';}}document.documentElement.setAttribute('data-theme',d);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+  // CRITICAL: Set data-theme on <html> SERVER-SIDE so the first paint is correct.
+  // Without this, the HTML arrives without data-theme → CSS defaults to :root (light)
+  // → visible flash before the inline script runs.
+  //
+  // The inline script then overrides with localStorage if the user has toggled before.
+  // Priority: localStorage > system preference > DB default
+  const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t&&t!==document.documentElement.getAttribute('data-theme')){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      data-theme={dbDefault}
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
