@@ -1,6 +1,20 @@
+<div align="center">
+
 # Abir Barman — Portfolio
 
-Personal portfolio website for **Abir Barman**, Data Scientist & ML Engineer. Built as a full-stack monorepo with a Next.js frontend, Express/Prisma backend, and a custom admin panel.
+**Data Scientist · ML Engineer**
+
+[![Live Site](https://img.shields.io/badge/Live%20Site-abirbarman.com-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://abirbarman.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Prisma-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](./LICENSE)
+
+A full-stack personal portfolio built as a monorepo — Next.js 16 frontend with server-side rendering, Express 5 REST API, PostgreSQL via Prisma ORM, and a protected admin panel for content management.
+
+**[abirbarman.com](https://abirbarman.com)**
+
+</div>
 
 ---
 
@@ -8,11 +22,13 @@ Personal portfolio website for **Abir Barman**, Data Scientist & ML Engineer. Bu
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 16 (App Router), TypeScript, Framer Motion |
-| Backend | Node.js, Express 5, TypeScript |
-| Database | PostgreSQL via Prisma ORM (PrismaPg adapter) |
-| Styling | CSS custom properties (design token system) |
-| Auth | JWT (admin panel only) |
+| ![Next.js](https://img.shields.io/badge/-Next.js%2016-black?logo=next.js) | App Router, React 19, SSR, TypeScript |
+| ![React](https://img.shields.io/badge/-React%2019-61DAFB?logo=react&logoColor=black) | Framer Motion, React Hook Form, Zod |
+| ![Three.js](https://img.shields.io/badge/-Three.js-black?logo=three.js) | React Three Fiber, Drei — 3D scene rendering |
+| ![Node.js](https://img.shields.io/badge/-Node.js-339933?logo=node.js&logoColor=white) | Express 5, TypeScript, tsx hot-reload |
+| ![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-336791?logo=postgresql&logoColor=white) | Prisma ORM 7, PrismaPg adapter |
+| ![Tailwind](https://img.shields.io/badge/-Tailwind%20CSS%204-06B6D4?logo=tailwindcss&logoColor=white) | CSS custom properties, design token system |
+| ![JWT](https://img.shields.io/badge/-JWT%20Auth-FB015B?logo=jsonwebtokens&logoColor=white) | Admin panel authentication only |
 
 ---
 
@@ -20,24 +36,34 @@ Personal portfolio website for **Abir Barman**, Data Scientist & ML Engineer. Bu
 
 ```
 MY_PORTFOLIO_WEBSITE/
-├── frontend/          # Next.js app (public site + admin panel)
+├── frontend/                       # Next.js 16 application
 │   └── src/
 │       ├── app/
-│       │   ├── page.tsx          # Public portfolio (SSR)
-│       │   └── admin/            # Protected admin pages
+│       │   ├── page.tsx            # Portfolio home (SSR)
+│       │   ├── about/              # About page
+│       │   ├── projects/[slug]/    # Dynamic project detail pages
+│       │   ├── research/[slug]/    # Dynamic research detail pages
+│       │   ├── certifications/     # Certifications listing + detail
+│       │   ├── achievements/       # Achievements timeline
+│       │   └── admin/              # Protected CMS (login, dashboard, CRUD)
 │       ├── components/
-│       │   ├── sections/         # Hero, About, Projects, Research…
-│       │   └── admin/            # AdminShell, AdminTable, Modal
+│       │   ├── sections/           # Hero, About, Projects, Skills, Research,
+│       │   │                       # Certifications, Achievements, Stats, Contact
+│       │   ├── admin/              # AdminShell, AdminTable, Modal
+│       │   └── ui/                 # Reusable UI primitives (PaperCard, …)
 │       └── lib/
-│           ├── types.ts          # Shared TypeScript interfaces
-│           └── api.ts            # Typed fetch wrapper
-└── backend/           # Express REST API
+│           ├── types.ts            # Shared TypeScript interfaces
+│           └── api.ts              # Typed fetch wrapper
+│
+└── backend/                        # Express 5 REST API
     ├── src/
-    │   ├── routes/               # certifications, research, projects…
-    │   ├── middleware/auth.ts    # JWT authentication
-    │   └── seed.ts               # Initial database seed
+    │   ├── routes/                 # certifications, research, projects,
+    │   │                           # achievements, skills, stats, messages, …
+    │   ├── middleware/
+    │   │   └── auth.ts             # JWT verification middleware
+    │   └── seed.ts                 # Initial database seed script
     └── prisma/
-        └── schema.prisma         # Database schema
+        └── schema.prisma           # Database models & relations
 ```
 
 ---
@@ -47,18 +73,20 @@ MY_PORTFOLIO_WEBSITE/
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
+- PostgreSQL instance (local or hosted)
 - npm
 
-### 1. Install dependencies
+### 1. Clone and install dependencies
 
 ```bash
+git clone https://github.com/abarman152/MY_PORTFOLIO_WEBSITE.git
+cd MY_PORTFOLIO_WEBSITE
 npm run install:all
 ```
 
 ### 2. Configure environment variables
 
-**Backend** — copy and fill in `backend/.env.example`:
+**Backend** — copy and populate `backend/.env.example`:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -79,18 +107,22 @@ NEXT_PUBLIC_API_URL=http://localhost:5001/api
 ### 3. Set up the database
 
 ```bash
-npm run db:push    # sync Prisma schema → PostgreSQL
-npm run db:seed    # seed initial data + admin account
+npm run db:push     # sync Prisma schema to PostgreSQL
+npm run db:seed     # seed initial content + default admin account
 ```
 
-Default admin credentials (change after first login):
-- Email: `admin@abirbarman.dev`
-- Password: `Admin@123`
+Default admin credentials — **change these immediately after first login**:
 
-### 4. Run in development
+| Field | Value |
+|---|---|
+| Email | `admin@abirbarman.dev` |
+| Password | `Admin@123` |
+
+### 4. Start development servers
+
+Run each in a separate terminal:
 
 ```bash
-# In two separate terminals:
 npm run dev:frontend    # http://localhost:3000
 npm run dev:backend     # http://localhost:5001
 ```
@@ -101,39 +133,48 @@ npm run dev:backend     # http://localhost:5001
 
 | Command | Description |
 |---|---|
-| `npm run dev:frontend` | Start Next.js dev server |
-| `npm run dev:backend` | Start Express dev server with hot reload |
-| `npm run install:all` | Install all dependencies (frontend + backend) |
+| `npm run dev:frontend` | Start Next.js development server |
+| `npm run dev:backend` | Start Express API with tsx hot-reload |
+| `npm run install:all` | Install all workspace dependencies |
 | `npm run build:frontend` | Production build of the Next.js app |
 | `npm run db:push` | Push Prisma schema changes to the database |
 | `npm run db:seed` | Seed the database with initial data |
-| `npm run db:studio` | Open Prisma Studio (DB GUI) |
+| `npm run db:studio` | Open Prisma Studio GUI |
+
+---
+
+## Portfolio Sections
+
+| Section | Description |
+|---|---|
+| **Hero** | Name, animated role titles, bio, social links, CTAs |
+| **About** | Background story, tech stack, expertise pillars |
+| **Projects** | Filterable cards with live demo and GitHub links |
+| **Skills** | Categorised skill tags — Data Science, ML, MLOps, Dev |
+| **Research** | Published papers with authors, journal, abstract, tags |
+| **Certifications** | Credentials with category filter, tags, descriptions |
+| **Achievements** | Timeline with featured items, descriptions, tags |
+| **Stats** | Animated impact counters |
+| **Contact** | Contact form + email, phone, location info |
 
 ---
 
 ## Admin Panel
 
-The admin panel lives at `/admin` on the frontend. It requires JWT authentication.
+The CMS lives at `/admin` and is protected by JWT authentication. It provides full CRUD control over every section of the site.
 
-Manage: Hero content · Social links · Projects · Research papers · Certifications · Achievements · Skills · Stats · Contact messages · Site settings
-
----
-
-## Sections
-
-| Section | Description |
-|---|---|
-| Hero | Name, roles, bio, social links, CTAs |
-| About | Story, tech stack, expertise pillars |
-| Projects | Filterable project cards with live/GitHub links |
-| Skills | Categorised skill tags (Data Science · ML · MLOps) |
-| Research | Published papers with authors, journal, tags |
-| Certifications | Credentials with category filter, tags, descriptions |
-| Achievements | Timeline with featured items, descriptions, tags |
-| Contact | Contact form + email/phone/location info |
+**Managed content:** Hero · Social Links · Projects · Research Papers · Certifications · Achievements · Skills · Stats · Contact Messages · Site Settings
 
 ---
 
 ## License
 
 MIT — see [LICENSE](./LICENSE)
+
+---
+
+<div align="center">
+
+Designed and built by [Abir Barman](https://abirbarman.com)
+
+</div>
