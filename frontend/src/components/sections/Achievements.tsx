@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Star, GraduationCap, Zap, Users } from 'lucide-react';
+import { Trophy, Star, GraduationCap, Zap, Users, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import type { Achievement } from '@/lib/types';
+
+const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
 const TYPE_ICON: Record<string, React.ElementType> = {
   Award: Trophy,
@@ -22,18 +24,18 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 function AchievementCard({ item, i }: { item: Achievement; i: number }) {
-  const [expanded, setExpanded] = useState(false);
-  const Icon = TYPE_ICON[item.type] || Trophy;
-  const color = item.featured ? '#f59e0b' : (TYPE_COLOR[item.type] || 'var(--accent)');
-  const isLong = item.description && item.description.length > 160;
+  const Icon = TYPE_ICON[item.category] || Trophy;
+  const color = item.featured ? '#f59e0b' : (TYPE_COLOR[item.category] || 'var(--accent)');
+  const hasSlug = !!item.slug;
+  const href = hasSlug ? `/achievements/${item.slug}` : null;
 
-  return (
+  const cardContent = (
     <motion.div
       key={item.id}
       initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.35, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
+      transition={{ duration: 0.35, delay: i * 0.07, ease: EASE }}
       style={{ position: 'relative' }}
     >
       {/* Timeline dot */}
@@ -54,6 +56,7 @@ function AchievementCard({ item, i }: { item: Achievement; i: number }) {
           padding: '1.25rem 1.5rem',
           borderLeft: item.featured ? `3px solid ${color}` : '1px solid var(--border)',
           transition: 'border-color 0.15s',
+          cursor: href ? 'pointer' : 'default',
         }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLElement).style.borderColor = item.featured ? color : 'var(--border-2)';
@@ -88,7 +91,7 @@ function AchievementCard({ item, i }: { item: Achievement; i: number }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem', flexShrink: 0 }}>
             <span className="tag" style={{ fontSize: '0.68rem', color }}>
-              {item.type}
+              {item.category}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
               {new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -98,29 +101,13 @@ function AchievementCard({ item, i }: { item: Achievement; i: number }) {
 
         {/* Description */}
         {item.description && (
-          <div style={{ marginTop: '0.625rem' }}>
-            <p style={{
-              fontSize: '0.875rem', color: 'var(--text-2)', lineHeight: 1.65,
-              display: isLong && !expanded ? '-webkit-box' : 'block',
-              WebkitLineClamp: isLong && !expanded ? 2 : undefined,
-              WebkitBoxOrient: isLong && !expanded ? 'vertical' : undefined,
-              overflow: isLong && !expanded ? 'hidden' : 'visible',
-            }}>
-              {item.description}
-            </p>
-            {isLong && (
-              <button
-                onClick={() => setExpanded((v) => !v)}
-                style={{
-                  marginTop: '0.25rem', background: 'none', border: 'none', padding: 0,
-                  color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >
-                {expanded ? 'Show less' : 'Read more'}
-              </button>
-            )}
-          </div>
+          <p style={{
+            fontSize: '0.875rem', color: 'var(--text-2)', lineHeight: 1.65,
+            marginTop: '0.625rem',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>
+            {item.description}
+          </p>
         )}
 
         {/* Tags */}
@@ -131,9 +118,32 @@ function AchievementCard({ item, i }: { item: Achievement; i: number }) {
             ))}
           </div>
         )}
+
+        {/* View details CTA */}
+        {href && (
+          <div style={{ marginTop: '0.875rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color }}>
+              View Details <ArrowRight size={12} />
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block', outline: 'none' }}
+        aria-label={`${item.title} — view details`}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }
 
 export default function Achievements({ achievements }: { achievements: Achievement[] }) {
@@ -144,7 +154,7 @@ export default function Achievements({ achievements }: { achievements: Achieveme
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
+          transition={{ duration: 0.35, ease: EASE }}
           style={{ marginBottom: '3rem' }}
         >
           <span className="eyebrow">Awards & Achievements</span>
@@ -175,6 +185,38 @@ export default function Achievements({ achievements }: { achievements: Achieveme
             </div>
           </div>
         )}
+
+        {/* View All button */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.35, delay: 0.15, ease: EASE }}
+          style={{ textAlign: 'center', marginTop: '2.5rem' }}
+        >
+          <Link
+            href="/achievements"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
+              padding: '0.65rem 1.5rem', borderRadius: '10px',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-2)', textDecoration: 'none',
+              fontSize: '0.875rem', fontWeight: 600,
+              transition: 'border-color 0.15s, color 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--accent)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--text-2)';
+            }}
+          >
+            View All Achievements <ArrowRight size={14} />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

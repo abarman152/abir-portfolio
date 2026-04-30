@@ -113,16 +113,22 @@ export interface CertificationListResponse {
 
 export interface Achievement {
   id: string;
+  slug: string | null;
   title: string;
   description: string;
+  overviewMd: string;
   date: string;
   issuer: string;
   imageUrl: string;
-  type: string;
+  badgeIcon: string;
+  images: string[];
+  category: string;
   tags: string[];
   featured: boolean;
   visible: boolean;
   order: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Skill {

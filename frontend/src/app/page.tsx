@@ -52,7 +52,7 @@ export default async function HomePage() {
     fetchData<ResearchItem[]>('/research/featured', []),
     fetchData<Skill[]>('/skills', []),
     fetchData<Certification[]>('/certifications/featured', DEFAULT_CERTS),
-    fetchData<Achievement[]>('/achievements', []),
+    fetchData<Achievement[]>('/achievements/featured', []),
     fetchData<Stat[]>('/stats', []),
   ]);
 
