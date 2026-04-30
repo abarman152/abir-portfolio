@@ -4,6 +4,31 @@ import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+async function uniqueSlug(base: string, excludeId?: string): Promise<string> {
+  let candidate = base;
+  let suffix = 1;
+  while (true) {
+    const existing = await prisma.certification.findUnique({ where: { slug: candidate } });
+    if (!existing || (excludeId && existing.id === excludeId)) return candidate;
+    suffix++;
+    candidate = `${base}-${suffix}`;
+  }
+}
+
+function toDatetime(val: unknown): Date | undefined {
+  if (!val) return undefined;
+  const str = String(val);
+  const d = new Date(str.length === 10 ? `${str}T00:00:00Z` : str);
+  return isNaN(d.getTime()) ? undefined : d;
+}
+
 // GET /certifications/featured — home page strip (featured + visible only)
 router.get('/featured', async (_req, res) => {
   const certs = await prisma.certification.findMany({
@@ -91,30 +116,75 @@ router.get('/:slug', async (req, res) => {
 
 // POST /certifications — admin create
 router.post('/', authenticate, async (req, res) => {
-  const { id: _id, createdAt, updatedAt, tags, skills, ...rest } = req.body;
-  const cert = await prisma.certification.create({
-    data: {
-      ...rest,
-      tags:   Array.isArray(tags)   ? tags   : [],
-      skills: Array.isArray(skills) ? skills : [],
-    },
-  });
-  res.status(201).json(cert);
+  try {
+    const { id: _id, createdAt, updatedAt, tags, skills, issueDate, expiryDate, slug, ...rest } = req.body;
+
+    const parsedIssueDate = toDatetime(issueDate);
+    if (!parsedIssueDate) {
+      return res.status(400).json({ error: 'Invalid or missing issueDate' });
+    }
+
+    const baseSlug = slug?.trim() ? slugify(slug) : slugify(rest.title || '');
+    if (!baseSlug) {
+      return res.status(400).json({ error: 'Title is required to generate a slug' });
+    }
+    const finalSlug = await uniqueSlug(baseSlug);
+
+    const cert = await prisma.certification.create({
+      data: {
+        ...rest,
+        slug:       finalSlug,
+        issueDate:  parsedIssueDate,
+        expiryDate: toDatetime(expiryDate) ?? null,
+        tags:       Array.isArray(tags)   ? tags   : [],
+        skills:     Array.isArray(skills) ? skills : [],
+      },
+    });
+    res.status(201).json(cert);
+  } catch (err) {
+    console.error('POST /certifications error:', err);
+    res.status(500).json({ error: 'Failed to create certification' });
+  }
 });
 
 // PUT /certifications/:id — admin update
 router.put('/:id', authenticate, async (req, res) => {
-  const id = req.params.id as string;
-  const { id: _id, createdAt, updatedAt, tags, skills, ...rest } = req.body;
-  const cert = await prisma.certification.update({
-    where: { id },
-    data: {
+  try {
+    const id = req.params.id as string;
+    const { id: _id, createdAt, updatedAt, tags, skills, issueDate, expiryDate, slug, ...rest } = req.body;
+
+    const data: Record<string, unknown> = {
       ...rest,
       tags:   Array.isArray(tags)   ? tags   : [],
       skills: Array.isArray(skills) ? skills : [],
-    },
-  });
-  res.json(cert);
+    };
+
+    if (issueDate) {
+      const parsed = toDatetime(issueDate);
+      if (!parsed) return res.status(400).json({ error: 'Invalid issueDate' });
+      data.issueDate = parsed;
+    }
+
+    if (expiryDate !== undefined) {
+      data.expiryDate = toDatetime(expiryDate) ?? null;
+    }
+
+    if (slug !== undefined) {
+      const baseSlug = slug?.trim() ? slugify(slug) : slugify(rest.title || '');
+      if (baseSlug) {
+        data.slug = await uniqueSlug(baseSlug, id);
+      }
+    }
+
+    const cert = await prisma.certification.update({
+      where: { id },
+      data,
+    });
+    res.json(cert);
+  } catch (err) {
+    console.error('PUT /certifications/:id error:', err);
+    res.status(500).json({ error: 'Failed to update certification' });
+  }
 });
 
 // PATCH /certifications/:id/visibility — toggle visibility
