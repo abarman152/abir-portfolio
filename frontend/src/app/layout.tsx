@@ -37,12 +37,13 @@ export const metadata: Metadata = {
   description: 'Data Scientist and ML Engineer building intelligent systems that turn data into real-world impact.',
   manifest: '/site.webmanifest',
   icons: {
+    // app/favicon.ico handles /favicon.ico automatically — only list PNG supplements here
     icon: [
-      { url: '/favicon.ico?v=2',       sizes: 'any' },
-      { url: '/favicon-16x16.png?v=2', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png?v=2', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: '/apple-touch-icon.png?v=2',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
   openGraph: {
     title: 'Abir — Data Scientist',
@@ -76,10 +77,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <head>
+      <head suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
