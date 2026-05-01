@@ -122,14 +122,24 @@ model Achievement {
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
+model SkillCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  skills    Skill[]
+}
+
 model Skill {
-  id            String  @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String
-  level         Int     @default(80)
+  level         Int            @default(80)
   category      String
-  icon          String  @default("")
-  order         Int     @default(0)
-  isHighlighted Boolean @default(false)
+  categoryId    String?
+  skillCategory SkillCategory? @relation(fields: [categoryId], references: [id])
+  icon          String         @default("")
+  order         Int            @default(0)
+  isHighlighted Boolean        @default(false)
 }
 
 model Stat {
@@ -215,4 +225,23 @@ model AboutSkillGroup {
   highlightedSkills String[] @default([])
   order             Int      @default(0)
   visible           Boolean  @default(true)
+}
+
+model NotificationSettings {
+  id               String   @id @default(cuid())
+  emailEnabled     Boolean  @default(false)
+  emailRecipients  String[] @default([])
+  whatsappEnabled  Boolean  @default(false)
+  whatsappNumbers  String[] @default([])
+  updatedAt        DateTime @updatedAt
+}
+
+model AboutSection {
+  id         String   @id @default(cuid())
+  headline   String   @default("Turning raw data into")
+  highlight  String   @default("decisions that matter.")
+  paragraphs Json     @default("[]")
+  skills     Json     @default("[]")
+  categories Json     @default("[]")
+  updatedAt  DateTime @updatedAt
 }

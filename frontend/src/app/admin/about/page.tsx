@@ -1,13 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Save, CheckCircle, Plus, Eye, EyeOff, Pencil, Trash2, Link2, Unlink, Image, Palette } from 'lucide-react';
+import { Save, CheckCircle, Plus, Eye, EyeOff, Pencil, Trash2, Link2, Unlink, Image, Palette, X, GripVertical } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import Modal, { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
-import type { AboutProfile, AboutConfig, Education, AboutSkillGroup, SiteSettings } from '@/lib/types';
+import type { AboutProfile, AboutConfig, Education, AboutSkillGroup, SiteSettings, AboutSectionData, AboutCategory } from '@/lib/types';
 
-type Tab = 'profile' | 'appearance' | 'education' | 'skills';
+type Tab = 'profile' | 'appearance' | 'education' | 'skills' | 'home';
+
+const ICON_OPTIONS = ['Brain', 'Database', 'Lightbulb', 'Code2', 'BarChart3', 'Globe', 'Cpu', 'Layers', 'Rocket', 'Server', 'Shield', 'Zap', 'BookOpen'];
+
+const EMPTY_CATEGORY: AboutCategory = { title: '', description: '', icon: 'Brain', color: '#6366f1' };
 
 const DEFAULT_ABOUT_CONFIG: AboutConfig = {
   backgroundType: 'gradient',
@@ -85,15 +89,22 @@ export default function AdminAbout() {
   const [highlightInput, setHighlightInput] = useState('');
   const [savingSkill, setSavingSkill] = useState(false);
 
+  /* home section state */
+  const [homeSection, setHomeSection] = useState<Partial<AboutSectionData>>({});
+  const [homeSkillInput, setHomeSkillInput] = useState('');
+  const [savingHome, setSavingHome] = useState(false);
+  const [savedHome, setSavedHome] = useState(false);
+
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
   const hdrs = authHeader(token);
 
   const load = async () => {
-    const [p, e, s, st] = await Promise.all([
+    const [p, e, s, st, hs] = await Promise.all([
       api.get<AboutProfile>('/about/profile', hdrs),
       api.get<Education[]>('/about/education/all', hdrs),
       api.get<AboutSkillGroup[]>('/about/skills/all', hdrs),
       api.get<SiteSettings>('/settings', hdrs),
+      api.get<AboutSectionData>('/about/section', hdrs),
     ]);
     setProfile(p);
     setEducation(e);
@@ -101,6 +112,8 @@ export default function AdminAbout() {
     if (st.aboutConfig) {
       setAboutConfig({ ...DEFAULT_ABOUT_CONFIG, ...st.aboutConfig });
     }
+    setHomeSection(hs);
+    setHomeSkillInput((hs.skills ?? []).join(', '));
   };
 
   useEffect(() => { load(); }, []);
@@ -227,11 +240,14 @@ export default function AdminAbout() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-          {(['profile', 'appearance', 'education', 'skills'] as Tab[]).map(t => (
-            <button key={t} onClick={() => setTab(t)} style={tabBtn(tab === t)}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
+          {(['profile', 'appearance', 'education', 'skills', 'home'] as Tab[]).map(t => {
+            const label = t === 'home' ? 'Home Section' : t.charAt(0).toUpperCase() + t.slice(1);
+            return (
+              <button key={t} onClick={() => setTab(t)} style={tabBtn(tab === t)}>
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {/* ── PROFILE TAB ─────────────────────────────── */}
@@ -532,6 +548,155 @@ export default function AdminAbout() {
             </div>
           </div>
         )}
+
+        {/* ── HOME SECTION TAB ─────────────────────────── */}
+        {tab === 'home' && (() => {
+          const paragraphs: string[] = Array.isArray(homeSection.paragraphs) ? homeSection.paragraphs : [];
+          const categories: AboutCategory[] = Array.isArray(homeSection.categories) ? homeSection.categories : [];
+          const skillsArr = homeSkillInput.split(',').map(s => s.trim()).filter(Boolean);
+
+          const saveHome = async (ev: React.FormEvent) => {
+            ev.preventDefault();
+            setSavingHome(true);
+            try {
+              await api.put('/about/section', {
+                headline: homeSection.headline || '',
+                highlight: homeSection.highlight || '',
+                paragraphs,
+                skills: skillsArr,
+                categories,
+              }, hdrs);
+              setSavedHome(true);
+              setTimeout(() => setSavedHome(false), 3000);
+            } finally { setSavingHome(false); }
+          };
+
+          const updateParagraph = (idx: number, val: string) => {
+            const next = [...paragraphs];
+            next[idx] = val;
+            setHomeSection({ ...homeSection, paragraphs: next });
+          };
+          const addParagraph = () => setHomeSection({ ...homeSection, paragraphs: [...paragraphs, ''] });
+          const removeParagraph = (idx: number) => {
+            const next = paragraphs.filter((_, i) => i !== idx);
+            setHomeSection({ ...homeSection, paragraphs: next });
+          };
+
+          const updateCategory = (idx: number, patch: Partial<AboutCategory>) => {
+            const next = [...categories];
+            next[idx] = { ...next[idx], ...patch };
+            setHomeSection({ ...homeSection, categories: next });
+          };
+          const addCategory = () => setHomeSection({ ...homeSection, categories: [...categories, { ...EMPTY_CATEGORY }] });
+          const removeCategory = (idx: number) => {
+            setHomeSection({ ...homeSection, categories: categories.filter((_, i) => i !== idx) });
+          };
+
+          return (
+            <form onSubmit={saveHome} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+              {/* Headline */}
+              <div style={cardStyle}>
+                <h2 style={cardTitle}>Headline</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                  <FormField label="Headline Text">
+                    <input style={inputCss} value={homeSection.headline || ''} onChange={e => setHomeSection({ ...homeSection, headline: e.target.value })} placeholder="Turning raw data into" />
+                  </FormField>
+                  <FormField label="Highlighted Text (accent color)">
+                    <input style={inputCss} value={homeSection.highlight || ''} onChange={e => setHomeSection({ ...homeSection, highlight: e.target.value })} placeholder="decisions that matter." />
+                  </FormField>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>Preview: {homeSection.headline || '…'} <span style={{ color: 'var(--accent)' }}>{homeSection.highlight || '…'}</span></p>
+                </div>
+              </div>
+
+              {/* Paragraphs */}
+              <div style={cardStyle}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h2 style={{ ...cardTitle, marginBottom: 0 }}>Paragraphs</h2>
+                  <button type="button" onClick={addParagraph} style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: 'none', background: 'var(--accent)', color: 'white', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Plus size={13} /> Add
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {paragraphs.map((p, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      <span style={{ color: 'var(--text-3)', fontSize: '0.75rem', marginTop: '0.6rem', flexShrink: 0 }}>{i + 1}.</span>
+                      <textarea rows={3} style={{ ...inputCss, resize: 'vertical', flex: 1 }} value={p} onChange={e => updateParagraph(i, e.target.value)} />
+                      <button type="button" onClick={() => removeParagraph(i)} style={{ width: 28, height: 28, borderRadius: '6px', border: 'none', cursor: 'pointer', background: 'rgba(239,68,68,0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '0.25rem' }}>
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                  {paragraphs.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>No paragraphs. Click "Add" to create one.</p>}
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div style={cardStyle}>
+                <h2 style={cardTitle}>Tech Skills / Tags</h2>
+                <FormField label="Skills (comma-separated)">
+                  <input style={inputCss} value={homeSkillInput} onChange={e => setHomeSkillInput(e.target.value)} placeholder="Python, PyTorch, TensorFlow, …" />
+                </FormField>
+                {skillsArr.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.75rem' }}>
+                    {skillsArr.map(s => <span key={s} className="tag" style={{ fontSize: '0.75rem' }}>{s}</span>)}
+                  </div>
+                )}
+              </div>
+
+              {/* Category Cards */}
+              <div style={cardStyle}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h2 style={{ ...cardTitle, marginBottom: 0 }}>Category Cards</h2>
+                  <button type="button" onClick={addCategory} style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: 'none', background: 'var(--accent)', color: 'white', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Plus size={13} /> Add Card
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {categories.map((cat, i) => (
+                    <div key={i} style={{ padding: '1rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-3)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-2)' }}>Card {i + 1}</span>
+                        <button type="button" onClick={() => removeCategory(i)} style={{ width: 26, height: 26, borderRadius: '6px', border: 'none', cursor: 'pointer', background: 'rgba(239,68,68,0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                        <FormField label="Title">
+                          <input style={inputCss} value={cat.title} onChange={e => updateCategory(i, { title: e.target.value })} placeholder="Machine Learning" />
+                        </FormField>
+                        <FormField label="Description">
+                          <textarea rows={2} style={{ ...inputCss, resize: 'vertical' }} value={cat.description} onChange={e => updateCategory(i, { description: e.target.value })} />
+                        </FormField>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
+                          <FormField label="Icon">
+                            <select style={inputCss} value={cat.icon} onChange={e => updateCategory(i, { icon: e.target.value })}>
+                              {ICON_OPTIONS.map(ic => <option key={ic} value={ic}>{ic}</option>)}
+                            </select>
+                          </FormField>
+                          <FormField label="Color">
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <input type="color" value={cat.color} onChange={e => updateCategory(i, { color: e.target.value })} style={{ width: 32, height: 32, border: 'none', borderRadius: '6px', cursor: 'pointer', padding: 0 }} />
+                              <input style={{ ...inputCss, flex: 1 }} value={cat.color} onChange={e => updateCategory(i, { color: e.target.value })} placeholder="#6366f1" />
+                            </div>
+                          </FormField>
+                        </div>
+                        <FormField label="Link (optional)">
+                          <input style={inputCss} value={cat.link || ''} onChange={e => updateCategory(i, { link: e.target.value })} placeholder="https://…" />
+                        </FormField>
+                      </div>
+                    </div>
+                  ))}
+                  {categories.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center', padding: '1.5rem' }}>No category cards. Click "Add Card" to create one.</p>}
+                </div>
+              </div>
+
+              <button type="submit" disabled={savingHome} style={saveBtn(savedHome, savingHome)}>
+                {savedHome ? <><CheckCircle size={16} /> Saved!</> : <><Save size={16} /> {savingHome ? 'Saving…' : 'Save Home Section'}</>}
+              </button>
+            </form>
+          );
+        })()}
       </div>
 
       {/* Education modal */}

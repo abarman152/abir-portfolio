@@ -51,29 +51,56 @@ async function main() {
     });
   }
 
+  // SkillCategory — upsert ensures idempotency
+  const CATEGORY_DEFS = [
+    { name: 'Data Science', order: 0 },
+    { name: 'ML',           order: 1 },
+    { name: 'Backend',      order: 2 },
+    { name: 'Frontend',     order: 3 },
+  ];
+  for (const def of CATEGORY_DEFS) {
+    await prisma.skillCategory.upsert({
+      where:  { name: def.name },
+      create: def,
+      update: { order: def.order },
+    });
+  }
+  const categoryMap = Object.fromEntries(
+    (await prisma.skillCategory.findMany()).map((c) => [c.name, c.id]),
+  );
+
   // Skills
   const skillsExist = await prisma.skill.count();
   if (!skillsExist) {
     await prisma.skill.createMany({
       data: [
-        { name: 'Python', level: 95, category: 'Data Science', order: 1 },
-        { name: 'Machine Learning', level: 90, category: 'Data Science', order: 2 },
-        { name: 'Deep Learning', level: 85, category: 'Data Science', order: 3 },
-        { name: 'Data Visualization', level: 88, category: 'Data Science', order: 4 },
-        { name: 'TensorFlow / PyTorch', level: 82, category: 'ML', order: 1 },
-        { name: 'Scikit-learn', level: 92, category: 'ML', order: 2 },
-        { name: 'NLP', level: 80, category: 'ML', order: 3 },
-        { name: 'Computer Vision', level: 78, category: 'ML', order: 4 },
-        { name: 'Node.js / Express', level: 85, category: 'Backend', order: 1 },
-        { name: 'PostgreSQL', level: 82, category: 'Backend', order: 2 },
-        { name: 'REST APIs', level: 90, category: 'Backend', order: 3 },
-        { name: 'Docker', level: 75, category: 'Backend', order: 4 },
-        { name: 'React / Next.js', level: 88, category: 'Frontend', order: 1 },
-        { name: 'TypeScript', level: 85, category: 'Frontend', order: 2 },
-        { name: 'Tailwind CSS', level: 90, category: 'Frontend', order: 3 },
-        { name: 'Three.js', level: 70, category: 'Frontend', order: 4 },
+        { name: 'Python',              level: 95, category: 'Data Science', categoryId: categoryMap['Data Science'], order: 1, isHighlighted: true  },
+        { name: 'Machine Learning',    level: 90, category: 'Data Science', categoryId: categoryMap['Data Science'], order: 2, isHighlighted: false },
+        { name: 'Deep Learning',       level: 85, category: 'Data Science', categoryId: categoryMap['Data Science'], order: 3, isHighlighted: false },
+        { name: 'Data Visualization',  level: 88, category: 'Data Science', categoryId: categoryMap['Data Science'], order: 4, isHighlighted: false },
+        { name: 'TensorFlow / PyTorch',level: 82, category: 'ML',           categoryId: categoryMap['ML'],           order: 1, isHighlighted: true  },
+        { name: 'Scikit-learn',        level: 92, category: 'ML',           categoryId: categoryMap['ML'],           order: 2, isHighlighted: true  },
+        { name: 'NLP',                 level: 80, category: 'ML',           categoryId: categoryMap['ML'],           order: 3, isHighlighted: true  },
+        { name: 'Computer Vision',     level: 78, category: 'ML',           categoryId: categoryMap['ML'],           order: 4, isHighlighted: false },
+        { name: 'Node.js / Express',   level: 85, category: 'Backend',      categoryId: categoryMap['Backend'],      order: 1, isHighlighted: false },
+        { name: 'PostgreSQL',          level: 82, category: 'Backend',      categoryId: categoryMap['Backend'],      order: 2, isHighlighted: true  },
+        { name: 'REST APIs',           level: 90, category: 'Backend',      categoryId: categoryMap['Backend'],      order: 3, isHighlighted: false },
+        { name: 'Docker',              level: 75, category: 'Backend',      categoryId: categoryMap['Backend'],      order: 4, isHighlighted: true  },
+        { name: 'React / Next.js',     level: 88, category: 'Frontend',     categoryId: categoryMap['Frontend'],     order: 1, isHighlighted: false },
+        { name: 'TypeScript',          level: 85, category: 'Frontend',     categoryId: categoryMap['Frontend'],     order: 2, isHighlighted: false },
+        { name: 'Tailwind CSS',        level: 90, category: 'Frontend',     categoryId: categoryMap['Frontend'],     order: 3, isHighlighted: false },
+        { name: 'Three.js',            level: 70, category: 'Frontend',     categoryId: categoryMap['Frontend'],     order: 4, isHighlighted: false },
       ],
     });
+  } else {
+    // Migrate any existing skills that are missing a categoryId
+    const unlinked = await prisma.skill.findMany({ where: { categoryId: null } });
+    for (const skill of unlinked) {
+      const catId = categoryMap[skill.category];
+      if (catId) {
+        await prisma.skill.update({ where: { id: skill.id }, data: { categoryId: catId } });
+      }
+    }
   }
 
   // Sample projects
@@ -371,6 +398,51 @@ async function main() {
         { label: 'Research Work',    position: 'bottom-right', icon: 'BookOpen',   isActive: true, order: 2 },
       ],
     });
+  }
+
+  // NotificationSettings — singleton, safe to create once
+  const notifExists = await prisma.notificationSettings.count();
+  if (!notifExists) {
+    await prisma.notificationSettings.create({ data: {} });
+    console.log('NotificationSettings record created (all channels disabled by default)');
+  }
+
+  // About Section (Home page)
+  const aboutSectionExists = await prisma.aboutSection.count();
+  if (!aboutSectionExists) {
+    await prisma.aboutSection.create({
+      data: {
+        headline: 'Turning raw data into',
+        highlight: 'decisions that matter.',
+        paragraphs: [
+          "I'm a Data Scientist and ML Engineer who loves the full journey — from exploring messy datasets to shipping production systems that make a measurable difference.",
+          "My work sits at the intersection of machine learning, research, and data storytelling. I build systems that don't just predict — they explain, alert, and act.",
+          "Outside of professional work, I contribute to research in quantum computing, NLP, and evolutionary optimization, compete on platforms like LeetCode and Codeforces, and explore applied AI systems.",
+        ],
+        skills: ['Python', 'PyTorch', 'TensorFlow', 'scikit-learn', 'PostgreSQL', 'Docker', 'Airflow', 'Quantum ML'],
+        categories: [
+          {
+            title: 'Machine Learning',
+            description: 'Designing and deploying ML models that solve real problems — from NLP and computer vision to anomaly detection and forecasting.',
+            icon: 'Brain',
+            color: '#6366f1',
+          },
+          {
+            title: 'Data Engineering',
+            description: 'Building robust data pipelines, ETL systems, and analytics infrastructure that make data reliable and decision-ready.',
+            icon: 'Database',
+            color: '#8b5cf6',
+          },
+          {
+            title: 'Research & Innovation',
+            description: 'Published researcher in quantum-enhanced NLP, post-quantum cryptography, and evolutionary optimization bridging theory with production systems.',
+            icon: 'Lightbulb',
+            color: '#f59e0b',
+          },
+        ],
+      },
+    });
+    console.log('AboutSection seeded with default home-page content');
   }
 
   console.log('Seed completed successfully!');

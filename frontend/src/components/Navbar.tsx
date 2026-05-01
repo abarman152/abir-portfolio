@@ -17,6 +17,22 @@ const navLinks = [
   { href: '/#contact',       label: 'Contact' },
 ];
 
+const drawerGroups = [
+  [
+    { href: '/',         label: 'Home' },
+    { href: '/about',    label: 'About' },
+    { href: '/projects', label: 'Projects' },
+    { href: '/research', label: 'Research' },
+  ],
+  [
+    { href: '/certifications', label: 'Certifications' },
+    { href: '/achievements',   label: 'Achievements' },
+  ],
+  [
+    { href: '/#contact', label: 'Contact' },
+  ],
+];
+
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
@@ -29,6 +45,11 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   useEffect(() => {
     if (pathname !== '/') return;
@@ -61,7 +82,8 @@ export default function Navbar() {
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
           height: '60px',
           display: 'flex', alignItems: 'center',
-          padding: '0 2rem',
+          padding: '0 1rem',
+          overflow: 'hidden',
           background: scrolled ? 'var(--bg-2)' : 'transparent',
           backdropFilter: scrolled ? 'blur(18px)' : 'none',
           borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
@@ -81,7 +103,7 @@ export default function Navbar() {
 
         {/* ── Desktop links ─────────────────────────── */}
         <div
-          style={{ display: 'flex', gap: '0.125rem', alignItems: 'center', flex: 1 }}
+          style={{ gap: '0.125rem', alignItems: 'center', flex: 1 }}
           className="hidden md:flex"
         >
           {navLinks.map((link) => {
@@ -199,38 +221,164 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
-      {/* ── Mobile menu ─────────────────────────────── */}
+      {/* ── Mobile drawer ───────────────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15 }}
-            style={{
-              position: 'fixed', top: 60, left: 0, right: 0, zIndex: 99,
-              background: 'var(--bg-2)', backdropFilter: 'blur(18px)',
-              borderBottom: '1px solid var(--border)',
-              padding: '0.75rem 2rem 1.25rem',
-            }}
-          >
-            {navLinks.map((link) => {
-              const mobileStyle: React.CSSProperties = { display: 'block', padding: '0.65rem 0', color: 'var(--text-2)', textDecoration: 'none', borderBottom: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 500 };
-              return link.href.startsWith('/') && !link.href.startsWith('/#') ? (
-                <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)} style={mobileStyle}>{link.label}</Link>
-              ) : (
-                <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} style={mobileStyle}>{link.label}</a>
-              );
-            })}
-            <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1rem' }}>
-              <a href="#" style={{ flex: 1, padding: '0.65rem', textAlign: 'center', borderRadius: '8px', border: '1px solid var(--border)', color: 'var(--text-2)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>
-                Resume
-              </a>
-              <a href="#contact" onClick={() => setMobileOpen(false)} style={{ flex: 1, padding: '0.65rem', textAlign: 'center', borderRadius: '8px', background: 'var(--accent)', color: 'white', textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem' }}>
-                Hire Me
-              </a>
-            </div>
-          </motion.div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 110,
+                background: 'rgba(0,0,0,0.55)',
+              }}
+            />
+
+            {/* Drawer panel */}
+            <motion.div
+              key="drawer-panel"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+              style={{
+                position: 'fixed', top: 0, right: 0, bottom: 0,
+                width: '80%', maxWidth: '320px',
+                zIndex: 120,
+                background: 'var(--bg-2)',
+                borderLeft: '1px solid var(--border)',
+                display: 'flex', flexDirection: 'column',
+                overflowY: 'auto',
+              }}
+            >
+              {/* Header */}
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '1rem 1.25rem',
+                borderBottom: '1px solid var(--border)',
+                flexShrink: 0,
+              }}>
+                <Link
+                  href="/"
+                  onClick={() => setMobileOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+                >
+                  <img src="/logo.svg" alt="Abir logo" style={{ width: 26, height: 26 }} />
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>Abir</span>
+                </Link>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    background: 'var(--bg-3)', border: '1px solid var(--border)',
+                    borderRadius: '8px', width: 32, height: 32,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--text-2)',
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Nav groups */}
+              <nav style={{ flex: 1, padding: '0.75rem 0' }}>
+                {drawerGroups.map((group, gi) => (
+                  <div key={gi}>
+                    {group.map((link) => {
+                      const active = isActive(link.href);
+                      const isPage = link.href.startsWith('/') && !link.href.startsWith('/#');
+                      const itemStyle: React.CSSProperties = {
+                        display: 'flex', alignItems: 'center',
+                        padding: '0.7rem 1.25rem',
+                        fontSize: '0.95rem',
+                        fontWeight: active ? 600 : 400,
+                        color: active ? 'var(--text)' : 'var(--text-2)',
+                        textDecoration: 'none',
+                        transition: 'color 0.15s, background 0.15s',
+                        borderRadius: '6px',
+                        margin: '0 0.5rem',
+                        background: active ? 'var(--bg-3)' : 'transparent',
+                      };
+                      return isPage ? (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setMobileOpen(false)}
+                          style={itemStyle}
+                          onMouseEnter={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-3)'; } }}
+                          onMouseLeave={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; } }}
+                        >
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setMobileOpen(false)}
+                          style={itemStyle}
+                          onMouseEnter={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-3)'; } }}
+                          onMouseLeave={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; } }}
+                        >
+                          {link.label}
+                        </a>
+                      );
+                    })}
+                    {gi < drawerGroups.length - 1 && (
+                      <div style={{ height: '1px', background: 'var(--border)', margin: '0.5rem 1.25rem' }} />
+                    )}
+                  </div>
+                ))}
+              </nav>
+
+              {/* CTA buttons */}
+              <div style={{
+                padding: '1rem 1.25rem 1.5rem',
+                borderTop: '1px solid var(--border)',
+                display: 'flex', flexDirection: 'column', gap: '0.625rem',
+                flexShrink: 0,
+              }}>
+                <a
+                  href="#"
+                  style={{
+                    display: 'block', textAlign: 'center',
+                    padding: '0.7rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-2)',
+                    textDecoration: 'none',
+                    fontSize: '0.875rem', fontWeight: 500,
+                    transition: 'border-color 0.15s, color 0.15s',
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)'; (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; }}
+                >
+                  Resume
+                </a>
+                <a
+                  href="#contact"
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'block', textAlign: 'center',
+                    padding: '0.7rem',
+                    borderRadius: '8px',
+                    background: 'var(--accent)',
+                    color: 'white',
+                    textDecoration: 'none',
+                    fontSize: '0.875rem', fontWeight: 600,
+                    transition: 'opacity 0.15s',
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.88')}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
+                >
+                  Hire Me
+                </a>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

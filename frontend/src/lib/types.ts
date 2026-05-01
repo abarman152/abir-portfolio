@@ -147,9 +147,25 @@ export interface Skill {
   name: string;
   level: number;
   category: string;
+  categoryId?: string | null;
   icon: string;
   order: number;
   isHighlighted: boolean;
+}
+
+export interface SkillCategory {
+  id: string;
+  name: string;
+  order: number;
+  createdAt: string;
+}
+
+export interface SkillCategoryWithSkills extends SkillCategory {
+  skills: Skill[];
+}
+
+export interface SkillsResponse {
+  categories: SkillCategoryWithSkills[];
 }
 
 export interface Stat {
@@ -232,6 +248,24 @@ export interface AboutSkillGroup {
   visible: boolean;
 }
 
+export interface AboutCategory {
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  link?: string;
+}
+
+export interface AboutSectionData {
+  id: string;
+  headline: string;
+  highlight: string;
+  paragraphs: string[];
+  skills: string[];
+  categories: AboutCategory[];
+  updatedAt: string;
+}
+
 export interface ContactMessage {
   id: string;
   name: string;
@@ -240,4 +274,13 @@ export interface ContactMessage {
   message: string;
   read: boolean;
   createdAt: string;
+}
+
+export interface NotificationSettings {
+  id: string;
+  emailEnabled: boolean;
+  emailRecipients: string[];
+  whatsappEnabled: boolean;
+  whatsappNumbers: string[];
+  updatedAt: string;
 }

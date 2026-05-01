@@ -8,12 +8,14 @@ import researchRoutes from './routes/research';
 import certRoutes from './routes/certifications';
 import achievementRoutes from './routes/achievements';
 import skillRoutes from './routes/skills';
+import categoryRoutes from './routes/categories';
 import statsRoutes from './routes/stats';
 import socialRoutes from './routes/social';
 import contactRoutes from './routes/contact';
 import settingsRoutes from './routes/settings';
 import aboutRoutes from './routes/about';
 import heroBadgeRoutes from './routes/heroBadges';
+import notificationSettingsRoutes from './routes/notificationSettings';
 
 dotenv.config();
 
@@ -39,12 +41,14 @@ app.use('/api/research', researchRoutes);
 app.use('/api/certifications', certRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/skills', skillRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/hero-badges', heroBadgeRoutes);
+app.use('/api/notification-settings', notificationSettingsRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
