@@ -64,12 +64,15 @@ async function sendEmails(payload: ContactPayload, recipients: string[]): Promis
     return;
   }
 
-  const transporter = nodemailer.createTransport({
+  // family:4 forces IPv4 — Render's IPv6 route to Gmail SMTP is unreachable
+  const smtpOpts = {
     host: SMTP_HOST,
     port: Number(SMTP_PORT || 587),
     secure: Number(SMTP_PORT) === 465,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
+    family: 4,
+  };
+  const transporter = nodemailer.createTransport(smtpOpts as Parameters<typeof nodemailer.createTransport>[0]);
 
   await Promise.allSettled(
     recipients.map((to) =>
