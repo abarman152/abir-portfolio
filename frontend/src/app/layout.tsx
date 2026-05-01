@@ -33,12 +33,29 @@ async function getDefaultTheme(): Promise<'dark' | 'light'> {
 }
 
 export const metadata: Metadata = {
-  title: 'Abir Barman — Data Scientist',
+  title: 'Abir — Data Scientist',
   description: 'Data Scientist and ML Engineer building intelligent systems that turn data into real-world impact.',
+  manifest: '/site.webmanifest',
+  icons: {
+    // app/favicon.ico handles /favicon.ico automatically — only list PNG supplements here
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
-    title: 'Abir Barman — Data Scientist',
+    title: 'Abir — Data Scientist',
     description: 'Data Scientist and ML Engineer building intelligent systems that turn data into real-world impact.',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Abir — Data Scientist' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Abir — Data Scientist',
+    description: 'Data Scientist and ML Engineer building intelligent systems that turn data into real-world impact.',
+    images: ['/og-image.png'],
   },
 };
 
@@ -60,10 +77,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <head>
+      <head suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

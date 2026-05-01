@@ -7,6 +7,7 @@ import { Search, X, Trophy, Star, GraduationCap, Zap, Users, ArrowRight, Chevron
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Achievement } from '@/lib/types';
+import { fmtMonthYearShort } from '@/lib/date';
 
 const API      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 const PER_PAGE = 10;
@@ -99,7 +100,7 @@ function AchievementCard({ item, i }: { item: Achievement; i: number }) {
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--text-3)' }}>
               <Calendar size={11} />
-              {new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {fmtMonthYearShort(item.date)}
             </span>
           </div>
         </div>

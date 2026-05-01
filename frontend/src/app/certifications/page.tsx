@@ -7,14 +7,11 @@ import { Search, X, Award, Calendar, Star, ExternalLink, ArrowRight, ChevronDown
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Certification } from '@/lib/types';
+import { fmtMonthYearShort } from '@/lib/date';
 
 const API      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 const PER_PAGE = 9;
 const EASE     = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
-
-function fmtDate(iso: string): string {
-  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); } catch { return ''; }
-}
 
 /* ─── Certification card ─────────────────────────────────── */
 function CertCard({ cert, index }: { cert: Certification; index: number }) {
@@ -107,7 +104,7 @@ function CertCard({ cert, index }: { cert: Certification; index: number }) {
           paddingTop: '0.75rem', borderTop: '1px solid var(--border)', marginTop: 'auto',
         }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--text-3)' }}>
-            <Calendar size={11} /> {fmtDate(cert.issueDate)}
+            <Calendar size={11} /> {fmtMonthYearShort(cert.issueDate)}
           </span>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             {cert.credentialUrl && (

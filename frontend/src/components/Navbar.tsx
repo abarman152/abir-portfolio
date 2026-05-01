@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Moon, Sun, Menu, X, Code2 } from 'lucide-react';
+import { Moon, Sun, Menu, X } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -73,15 +73,9 @@ export default function Navbar() {
           href="/"
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', marginRight: '2rem', flexShrink: 0 }}
         >
-          <div style={{
-            width: 30, height: 30, borderRadius: '8px',
-            background: 'var(--accent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Code2 size={15} color="white" />
-          </div>
+          <img src="/logo.svg" alt="Abir logo" style={{ width: 30, height: 30, display: 'block' }} />
           <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text)', letterSpacing: '-0.01em' }}>
-            Abir<span style={{ color: 'var(--accent)' }}>.dev</span>
+            Abir
           </span>
         </Link>
 

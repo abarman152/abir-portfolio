@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Trophy, Code2, BookOpen, Zap, Star, Target } from 'lucide-react';
 import type { Achievement, Stat } from '@/lib/types';
+import { fmtMonthYearShort } from '@/lib/date';
 
 function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
   const [n, setN] = useState(0);
@@ -19,7 +20,7 @@ function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
     }, dur / steps);
     return () => clearInterval(t);
   }, [inView, to]);
-  return <span ref={ref}>{n.toLocaleString()}{suffix}</span>;
+  return <span ref={ref}>{n.toLocaleString('en-US')}{suffix}</span>;
 }
 
 const METRICS = [
@@ -141,7 +142,7 @@ export default function Impact({ achievements, stats }: { achievements: Achievem
                     <p style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>{a.title}</p>
                     {a.issuer && <p style={{ fontSize: '0.78rem', color: 'var(--accent)', marginTop: '0.2rem' }}>{a.issuer}</p>}
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.2rem' }}>
-                      {new Date(a.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      {fmtMonthYearShort(a.date)}
                     </p>
                   </div>
                 </motion.div>

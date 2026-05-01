@@ -92,9 +92,10 @@ export default function Footer() {
       >
         {/* Left — Identity */}
         <div>
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <img src="/logo.svg" alt="Abir logo" style={{ width: 28, height: 28, display: 'block' }} />
             <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>
-              Abir<span style={{ color: 'var(--accent)' }}>.dev</span>
+              Abir
             </span>
           </Link>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 500, marginTop: '0.3rem', letterSpacing: '0.02em' }}>

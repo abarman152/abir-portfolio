@@ -8,6 +8,7 @@ import { ArrowLeft, ExternalLink, Calendar, Star, BookOpen, Users } from 'lucide
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Research, ResearchAuthor } from '@/lib/types';
+import { fmtMonthYear } from '@/lib/date';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -17,14 +18,6 @@ function Md({ children }: { children: string }) {
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
     </div>
   );
-}
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  } catch {
-    return iso;
-  }
 }
 
 function AuthorBadge({ author }: { author: ResearchAuthor }) {
@@ -110,7 +103,7 @@ export default function ResearchDetail({ item }: { item: Research }) {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
               {item.publishedAt && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', color: 'var(--text-3)' }}>
-                  <Calendar size={12} /> {formatDate(item.publishedAt)}
+                  <Calendar size={12} /> {fmtMonthYear(item.publishedAt)}
                 </span>
               )}
               {item.publisher && (
@@ -210,7 +203,7 @@ export default function ResearchDetail({ item }: { item: Research }) {
                 {item.publishedAt && (
                   <div>
                     <p style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Published</p>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-2)' }}>{formatDate(item.publishedAt)}</p>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--text-2)' }}>{fmtMonthYear(item.publishedAt)}</p>
                   </div>
                 )}
                 {item.tags?.length > 0 && (

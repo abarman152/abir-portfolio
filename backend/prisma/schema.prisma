@@ -123,12 +123,13 @@ model Achievement {
 }
 
 model Skill {
-  id       String @id @default(cuid())
-  name     String
-  level    Int    @default(80)
-  category String
-  icon     String @default("")
-  order    Int    @default(0)
+  id            String  @id @default(cuid())
+  name          String
+  level         Int     @default(80)
+  category      String
+  icon          String  @default("")
+  order         Int     @default(0)
+  isHighlighted Boolean @default(false)
 }
 
 model Stat {
@@ -158,6 +159,7 @@ model SiteSettings {
   metaDesc     String @default("Portfolio of Abir Barman - Data Scientist & Full Stack Developer")
   ogImageUrl   String @default("")
   heroConfig   Json   @default("{\"backgroundType\":\"gradient\",\"backgroundValue\":\"\",\"profileImage\":\"\",\"themeImages\":{},\"overlayStyle\":\"\",\"linkedMode\":true}")
+  aboutConfig  Json   @default("{\"backgroundType\":\"gradient\",\"backgroundValue\":\"\",\"profileImage\":\"\",\"linkedMode\":true}")
 }
 
 model HeroBadge {
@@ -184,11 +186,10 @@ model AboutProfile {
   leetcodeUrl      String   @default("")
   codechefUrl      String   @default("")
   location         String   @default("India")
-  primaryPhoto     String   @default("")
-  secondaryPhoto   String   @default("")
   showSummary      Boolean  @default(true)
   showEducation    Boolean  @default(true)
   showAchievements Boolean  @default(true)
+  showProjects     Boolean  @default(true)
   showSkills       Boolean  @default(true)
   updatedAt        DateTime @default(now()) @updatedAt
 }
@@ -208,9 +209,10 @@ model Education {
 }
 
 model AboutSkillGroup {
-  id       String   @id @default(cuid())
-  category String
-  skills   String[]
-  order    Int      @default(0)
-  visible  Boolean  @default(true)
+  id                String   @id @default(cuid())
+  category          String
+  skills            String[]
+  highlightedSkills String[] @default([])
+  order             Int      @default(0)
+  visible           Boolean  @default(true)
 }

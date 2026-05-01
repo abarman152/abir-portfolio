@@ -9,6 +9,7 @@ import { ArrowLeft, GitFork, ExternalLink, Calendar, Star, ChevronLeft, ChevronR
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Project } from '@/lib/types';
+import { fmtMonthYear } from '@/lib/date';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -145,7 +146,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
   const [resultExpanded,  setResultExpanded]  = useState(false);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
-  const displayDate = project.date || new Date(project.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const displayDate = project.date || fmtMonthYear(project.createdAt);
   const bannerUrl   = project.bannerImageUrl || project.imageUrl || '';
   const gallery     = [...(project.resultImages ?? []), ...(project.screenshots ?? [])];
 

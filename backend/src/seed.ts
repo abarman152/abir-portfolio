@@ -1,6 +1,14 @@
 import prisma from './lib/prisma';
 import bcrypt from 'bcryptjs';
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
 async function main() {
   // Admin
   const adminExists = await prisma.admin.count();
@@ -122,6 +130,7 @@ async function main() {
     await prisma.achievement.createMany({
       data: [
         {
+          slug: 'international-best-researcher-award',
           title: 'International Best Researcher Award',
           description: 'Recognized at the Asia Research Award 2025 for outstanding contributions to data science and analytics research at an international level.',
           date: new Date('2025-01-01'),
@@ -133,6 +142,7 @@ async function main() {
           order: 1,
         },
         {
+          slug: 'membership-american-chamber-of-research',
           title: 'Membership, American Chamber of Research',
           description: 'Inducted as a member recognizing contributions to research and innovation in computer science and data analytics.',
           date: new Date('2025-01-01'),
@@ -147,12 +157,26 @@ async function main() {
     });
   }
 
+  // Fix any existing achievements that were seeded without a slug
+  const sluglessAchievements = await prisma.achievement.findMany({ where: { slug: null } });
+  for (const ach of sluglessAchievements) {
+    const base = slugify(ach.title);
+    let candidate = base;
+    let suffix = 1;
+    while (await prisma.achievement.findFirst({ where: { slug: candidate, NOT: { id: ach.id } } })) {
+      candidate = `${base}-${++suffix}`;
+    }
+    await prisma.achievement.update({ where: { id: ach.id }, data: { slug: candidate } });
+    console.log(`Fixed slug for achievement: ${ach.title} → ${candidate}`);
+  }
+
   // Certifications
   const certsExist = await prisma.certification.count();
   if (!certsExist) {
     await prisma.certification.createMany({
       data: [
         {
+          slug: 'oracle-oci-ai-2025',
           title: 'Oracle Cloud Infrastructure 2025 Certified AI Foundations Associate',
           issuer: 'Oracle',
           issueDate: new Date('2026-02-01'),
@@ -166,6 +190,7 @@ async function main() {
           visible: true,
         },
         {
+          slug: 'generative-ai-mastermind-program',
           title: 'Generative AI Mastermind Program',
           issuer: 'Outskill',
           issueDate: new Date('2026-01-01'),
@@ -175,12 +200,35 @@ async function main() {
           category: 'AI / Generative AI',
           description: 'Completed an advanced program focused on Generative AI concepts and real-world applications. Gained hands-on exposure to modern AI tools, model workflows, and practical implementation strategies. Mentored by Vaibhav Sisinty.',
           tags: ['Generative AI', 'LLMs', 'AI Systems'],
-          featured: false,
+          featured: true,
           visible: true,
         },
       ],
     });
   }
+
+  // Fix any existing certifications seeded without a slug; also ensure featured flags are correct
+  const sluglessCerts = await prisma.certification.findMany({ where: { slug: null } });
+  for (const cert of sluglessCerts) {
+    const base = slugify(cert.title);
+    let candidate = base;
+    let suffix = 1;
+    while (await prisma.certification.findFirst({ where: { slug: candidate, NOT: { id: cert.id } } })) {
+      candidate = `${base}-${++suffix}`;
+    }
+    await prisma.certification.update({ where: { id: cert.id }, data: { slug: candidate } });
+    console.log(`Fixed slug for certification: ${cert.title} → ${candidate}`);
+  }
+
+  // Ensure known certifications have correct featured + visible flags
+  await prisma.certification.updateMany({
+    where: { slug: 'generative-ai-mastermind-program' },
+    data: { featured: true, visible: true },
+  });
+  await prisma.certification.updateMany({
+    where: { title: { contains: 'Oracle Cloud Infrastructure 2025' } },
+    data: { featured: true, visible: true },
+  });
 
   // Sample research items
   const researchExist = await prisma.research.count();
@@ -260,11 +308,10 @@ async function main() {
         leetcodeUrl: 'https://leetcode.com/u/abirbarman/',
         codechefUrl: 'https://www.codechef.com/users/abirbarman',
         location: 'India',
-        primaryPhoto: '',
-        secondaryPhoto: '',
         showSummary: true,
         showEducation: true,
         showAchievements: true,
+        showProjects: true,
         showSkills: true,
       },
     });

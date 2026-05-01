@@ -9,6 +9,7 @@ import { ArrowLeft, Calendar, Star, Trophy, GraduationCap, Zap, Users, X, Chevro
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Achievement } from '@/lib/types';
+import { fmtFullDate } from '@/lib/date';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -36,10 +37,6 @@ function Md({ children }: { children: string }) {
   );
 }
 
-function fmtDate(iso: string): string {
-  try { return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
-  catch { return iso; }
-}
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -377,7 +374,7 @@ export default function AchievementDetail({ item }: { item: Achievement }) {
                   </span>
                 )}
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem', color: 'var(--text-3)' }}>
-                  <Calendar size={12} /> {fmtDate(item.date)}
+                  <Calendar size={12} /> {fmtFullDate(item.date)}
                 </span>
               </motion.div>
             </div>
@@ -456,7 +453,7 @@ export default function AchievementDetail({ item }: { item: Achievement }) {
                 </div>
                 <div>
                   <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', marginBottom: '0.3rem' }}>DATE</p>
-                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>{fmtDate(item.date)}</p>
+                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>{fmtFullDate(item.date)}</p>
                 </div>
               </div>
             </motion.div>
