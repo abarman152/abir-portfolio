@@ -58,6 +58,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   metaDesc: 'Portfolio of Abir Barman - Data Scientist & Full Stack Developer',
   ogImageUrl: '',
   heroConfig: DEFAULT_HERO_CONFIG,
+  aboutConfig: { backgroundType: 'gradient', backgroundValue: '', profileImage: '', linkedMode: true },
 };
 
 const DEFAULT_CERTS: Certification[] = [];

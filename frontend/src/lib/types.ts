@@ -149,6 +149,7 @@ export interface Skill {
   category: string;
   icon: string;
   order: number;
+  isHighlighted: boolean;
 }
 
 export interface Stat {
@@ -172,6 +173,13 @@ export interface HeroConfig {
   linkedMode: boolean;
 }
 
+export interface AboutConfig {
+  backgroundType: 'gradient' | 'image';
+  backgroundValue: string;
+  profileImage: string;
+  linkedMode: boolean;
+}
+
 export interface SiteSettings {
   id: string;
   defaultTheme: string;
@@ -180,6 +188,7 @@ export interface SiteSettings {
   metaDesc: string;
   ogImageUrl: string;
   heroConfig: HeroConfig;
+  aboutConfig: AboutConfig;
 }
 
 export interface AboutProfile {
@@ -195,11 +204,10 @@ export interface AboutProfile {
   leetcodeUrl: string;
   codechefUrl: string;
   location: string;
-  primaryPhoto: string;
-  secondaryPhoto: string;
   showSummary: boolean;
   showEducation: boolean;
   showAchievements: boolean;
+  showProjects: boolean;
   showSkills: boolean;
 }
 
@@ -219,6 +227,7 @@ export interface AboutSkillGroup {
   id: string;
   category: string;
   skills: string[];
+  highlightedSkills: string[];
   order: number;
   visible: boolean;
 }

@@ -74,14 +74,19 @@ router.get('/skills/all', authenticate, async (_, res) => {
 });
 
 router.post('/skills', authenticate, async (req, res) => {
-  const { category, skills, order, visible } = req.body;
+  const { category, skills, highlightedSkills, order, visible } = req.body;
   const skillsArr = Array.isArray(skills)
     ? skills
     : typeof skills === 'string'
       ? skills.split(',').map((s: string) => s.trim()).filter(Boolean)
       : [];
+  const highlightedArr = Array.isArray(highlightedSkills)
+    ? highlightedSkills
+    : typeof highlightedSkills === 'string'
+      ? highlightedSkills.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : [];
   const group = await prisma.aboutSkillGroup.create({
-    data: { category, skills: skillsArr, order: order ?? 0, visible: visible !== false },
+    data: { category, skills: skillsArr, highlightedSkills: highlightedArr, order: order ?? 0, visible: visible !== false },
   });
   res.json(group);
 });
@@ -94,15 +99,20 @@ router.patch('/skills/:id/visibility', authenticate, async (req, res) => {
 
 router.put('/skills/:id', authenticate, async (req, res) => {
   const id = req.params.id as string;
-  const { category, skills, order, visible } = req.body;
+  const { category, skills, highlightedSkills, order, visible } = req.body;
   const skillsArr = Array.isArray(skills)
     ? skills
     : typeof skills === 'string'
       ? skills.split(',').map((s: string) => s.trim()).filter(Boolean)
       : [];
+  const highlightedArr = Array.isArray(highlightedSkills)
+    ? highlightedSkills
+    : typeof highlightedSkills === 'string'
+      ? highlightedSkills.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : [];
   const group = await prisma.aboutSkillGroup.update({
     where: { id },
-    data: { category, skills: skillsArr, order, visible },
+    data: { category, skills: skillsArr, highlightedSkills: highlightedArr, order, visible },
   });
   res.json(group);
 });

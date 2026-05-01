@@ -1,19 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Save, CheckCircle, Plus, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { Save, CheckCircle, Plus, Eye, EyeOff, Pencil, Trash2, Link2, Unlink, Image, Palette } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import Modal, { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
-import type { AboutProfile, Education, AboutSkillGroup } from '@/lib/types';
+import type { AboutProfile, AboutConfig, Education, AboutSkillGroup, SiteSettings } from '@/lib/types';
 
-type Tab = 'profile' | 'education' | 'skills';
+type Tab = 'profile' | 'appearance' | 'education' | 'skills';
+
+const DEFAULT_ABOUT_CONFIG: AboutConfig = {
+  backgroundType: 'gradient',
+  backgroundValue: '',
+  profileImage: '',
+  linkedMode: true,
+};
 
 const EMPTY_EDU: Partial<Education> = {
   degree: '', institution: '', location: '', startDate: '', endDate: '', description: '', order: 0, visible: true,
 };
 const EMPTY_SKILL: Partial<AboutSkillGroup> = {
-  category: '', skills: [], order: 0, visible: true,
+  category: '', skills: [], highlightedSkills: [], order: 0, visible: true,
 };
 
 const tabBtn = (active: boolean): React.CSSProperties => ({
@@ -24,36 +31,76 @@ const tabBtn = (active: boolean): React.CSSProperties => ({
   transition: 'all 0.15s',
 });
 
+const toggleKnobStyle = (active: boolean): React.CSSProperties => ({
+  position: 'absolute',
+  top: 3,
+  left: active ? 22 : 3,
+  width: 18,
+  height: 18,
+  borderRadius: '50%',
+  background: 'white',
+  transition: 'left 0.2s',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+});
+
+const previewBox: React.CSSProperties = {
+  width: '100%',
+  height: 100,
+  borderRadius: '10px',
+  border: '1px solid var(--border)',
+  overflow: 'hidden',
+  background: 'var(--bg-3)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '0.75rem',
+  color: 'var(--text-3)',
+  fontWeight: 500,
+};
+
 export default function AdminAbout() {
   const [tab, setTab] = useState<Tab>('profile');
+
+  /* profile state */
   const [profile, setProfile] = useState<Partial<AboutProfile>>({});
-  const [education, setEducation] = useState<Education[]>([]);
-  const [skills, setSkills] = useState<AboutSkillGroup[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  /* appearance state */
+  const [aboutConfig, setAboutConfig] = useState<AboutConfig>(DEFAULT_ABOUT_CONFIG);
+  const [savingAppearance, setSavingAppearance] = useState(false);
+  const [savedAppearance, setSavedAppearance] = useState(false);
+
+  /* education state */
+  const [education, setEducation] = useState<Education[]>([]);
   const [eduModal, setEduModal] = useState(false);
   const [eduForm, setEduForm] = useState<Partial<Education>>(EMPTY_EDU);
+  const [savingEdu, setSavingEdu] = useState(false);
 
+  /* skills state */
+  const [skills, setSkills] = useState<AboutSkillGroup[]>([]);
   const [skillModal, setSkillModal] = useState(false);
   const [skillForm, setSkillForm] = useState<Partial<AboutSkillGroup>>(EMPTY_SKILL);
   const [skillInput, setSkillInput] = useState('');
-
-  const [savingEdu, setSavingEdu] = useState(false);
+  const [highlightInput, setHighlightInput] = useState('');
   const [savingSkill, setSavingSkill] = useState(false);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
   const hdrs = authHeader(token);
 
   const load = async () => {
-    const [p, e, s] = await Promise.all([
+    const [p, e, s, st] = await Promise.all([
       api.get<AboutProfile>('/about/profile', hdrs),
       api.get<Education[]>('/about/education/all', hdrs),
       api.get<AboutSkillGroup[]>('/about/skills/all', hdrs),
+      api.get<SiteSettings>('/settings', hdrs),
     ]);
     setProfile(p);
     setEducation(e);
     setSkills(s);
+    if (st.aboutConfig) {
+      setAboutConfig({ ...DEFAULT_ABOUT_CONFIG, ...st.aboutConfig });
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -68,6 +115,20 @@ export default function AdminAbout() {
       setTimeout(() => setSaved(false), 3000);
     } finally { setSaving(false); }
   };
+
+  /* ── Appearance save ── */
+  const saveAppearance = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingAppearance(true);
+    try {
+      await api.put('/settings', { aboutConfig }, hdrs);
+      setSavedAppearance(true);
+      setTimeout(() => setSavedAppearance(false), 3000);
+    } finally { setSavingAppearance(false); }
+  };
+
+  const updateConfig = (patch: Partial<AboutConfig>) =>
+    setAboutConfig(prev => ({ ...prev, ...patch }));
 
   /* ── Education CRUD ── */
   const openAddEdu = () => { setEduForm(EMPTY_EDU); setEduModal(true); };
@@ -96,20 +157,30 @@ export default function AdminAbout() {
   };
 
   /* ── Skills CRUD ── */
-  const openAddSkill = () => { setSkillForm(EMPTY_SKILL); setSkillInput(''); setSkillModal(true); };
+  const openAddSkill = () => {
+    setSkillForm(EMPTY_SKILL);
+    setSkillInput('');
+    setHighlightInput('');
+    setSkillModal(true);
+  };
   const openEditSkill = (s: AboutSkillGroup) => {
     setSkillForm({ ...s });
     setSkillInput(s.skills.join(', '));
+    setHighlightInput((s.highlightedSkills ?? []).join(', '));
     setSkillModal(true);
   };
 
   const submitSkill = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingSkill(true);
-    const skills = skillInput.split(',').map(s => s.trim()).filter(Boolean);
+    const skillsArr = skillInput.split(',').map(s => s.trim()).filter(Boolean);
+    const highlightedArr = highlightInput.split(',').map(s => s.trim()).filter(Boolean);
     try {
-      if (skillForm.id) await api.put(`/about/skills/${skillForm.id}`, { ...skillForm, skills }, hdrs);
-      else await api.post('/about/skills', { ...skillForm, skills }, hdrs);
+      if (skillForm.id) {
+        await api.put(`/about/skills/${skillForm.id}`, { ...skillForm, skills: skillsArr, highlightedSkills: highlightedArr }, hdrs);
+      } else {
+        await api.post('/about/skills', { ...skillForm, skills: skillsArr, highlightedSkills: highlightedArr }, hdrs);
+      }
       setSkillModal(false);
       load();
     } finally { setSavingSkill(false); }
@@ -126,23 +197,37 @@ export default function AdminAbout() {
     load();
   };
 
-  const toggleStyle: React.CSSProperties = { accentColor: 'var(--accent)', width: 15, height: 15 };
+  const toggleStyle = (active: boolean): React.CSSProperties => ({
+    width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+    position: 'relative', background: active ? 'var(--accent)' : 'var(--bg-3)',
+    transition: 'background 0.2s', flexShrink: 0,
+  });
+
+  const checkStyle: React.CSSProperties = { accentColor: 'var(--accent)', width: 15, height: 15 };
   const checkLabel: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--text-2)' };
+  const cardStyle: React.CSSProperties = { padding: '1.5rem', borderRadius: '14px', background: 'var(--bg-card)', border: '1px solid var(--border)' };
+  const cardTitle: React.CSSProperties = { fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem' };
+  const saveBtn = (isSaved: boolean, isLoading: boolean): React.CSSProperties => ({
+    padding: '0.875rem 2rem', borderRadius: '12px', border: 'none',
+    background: isSaved ? '#10b981' : 'var(--accent)', color: 'white',
+    fontSize: '0.95rem', fontWeight: 600, cursor: isLoading ? 'not-allowed' : 'pointer',
+    display: 'flex', alignItems: 'center', gap: '0.5rem', alignSelf: 'flex-start',
+    transition: 'background 0.3s',
+  });
 
   return (
     <AdminShell>
       <div style={{ maxWidth: '760px' }}>
-        {/* Header */}
         <div style={{ marginBottom: '1.75rem' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>About Page</h1>
           <p style={{ color: 'var(--text-3)', fontSize: '0.875rem', marginTop: '0.2rem' }}>
-            Manage your profile, education, and skills
+            Manage your profile, appearance, education, and skills
           </p>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-          {(['profile', 'education', 'skills'] as Tab[]).map(t => (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          {(['profile', 'appearance', 'education', 'skills'] as Tab[]).map(t => (
             <button key={t} onClick={() => setTab(t)} style={tabBtn(tab === t)}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -153,9 +238,8 @@ export default function AdminAbout() {
         {tab === 'profile' && (
           <form onSubmit={saveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-            {/* Identity */}
-            <div style={{ padding: '1.5rem', borderRadius: '14px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem' }}>Identity</h2>
+            <div style={cardStyle}>
+              <h2 style={cardTitle}>Identity</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
                   <FormField label="Full Name">
@@ -171,9 +255,8 @@ export default function AdminAbout() {
               </div>
             </div>
 
-            {/* Contact */}
-            <div style={{ padding: '1.5rem', borderRadius: '14px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem' }}>Contact Info</h2>
+            <div style={cardStyle}>
+              <h2 style={cardTitle}>Contact Info</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
                   <FormField label="Phone">
@@ -207,22 +290,8 @@ export default function AdminAbout() {
               </div>
             </div>
 
-            {/* Photos */}
-            <div style={{ padding: '1.5rem', borderRadius: '14px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem' }}>Photos</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                <FormField label="Primary Photo URL">
-                  <input style={inputCss} value={profile.primaryPhoto || ''} onChange={e => setProfile({ ...profile, primaryPhoto: e.target.value })} placeholder="Cloudinary URL for main profile photo" />
-                </FormField>
-                <FormField label="Secondary Photo URL (shown in summary section)">
-                  <input style={inputCss} value={profile.secondaryPhoto || ''} onChange={e => setProfile({ ...profile, secondaryPhoto: e.target.value })} placeholder="Optional secondary photo URL" />
-                </FormField>
-              </div>
-            </div>
-
-            {/* Summary */}
-            <div style={{ padding: '1.5rem', borderRadius: '14px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem' }}>Professional Summary</h2>
+            <div style={cardStyle}>
+              <h2 style={cardTitle}>Professional Summary</h2>
               <textarea
                 rows={6}
                 style={{ ...inputCss, resize: 'vertical', lineHeight: 1.7 }}
@@ -232,18 +301,18 @@ export default function AdminAbout() {
               />
             </div>
 
-            {/* Section visibility */}
-            <div style={{ padding: '1.5rem', borderRadius: '14px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1.25rem' }}>Section Visibility</h2>
+            <div style={cardStyle}>
+              <h2 style={cardTitle}>Section Visibility</h2>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
                 {[
-                  { key: 'showSummary', label: 'Show Summary' },
-                  { key: 'showEducation', label: 'Show Education' },
+                  { key: 'showSummary',      label: 'Show Summary' },
+                  { key: 'showEducation',    label: 'Show Education' },
                   { key: 'showAchievements', label: 'Show Achievements' },
-                  { key: 'showSkills', label: 'Show Skills' },
+                  { key: 'showProjects',     label: 'Show Featured Projects' },
+                  { key: 'showSkills',       label: 'Show Skills' },
                 ].map(({ key, label }) => (
                   <label key={key} style={checkLabel}>
-                    <input type="checkbox" style={toggleStyle}
+                    <input type="checkbox" style={checkStyle}
                       checked={!!profile[key as keyof AboutProfile]}
                       onChange={e => setProfile({ ...profile, [key]: e.target.checked })}
                     />
@@ -253,12 +322,128 @@ export default function AdminAbout() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={saving}
-              style={{ padding: '0.875rem 2rem', borderRadius: '12px', border: 'none', background: saved ? '#10b981' : 'var(--accent)', color: 'white', fontSize: '0.95rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', alignSelf: 'flex-start', transition: 'background 0.3s' }}
-            >
+            <button type="submit" disabled={saving} style={saveBtn(saved, saving)}>
               {saved ? <><CheckCircle size={16} /> Saved!</> : <><Save size={16} /> {saving ? 'Saving…' : 'Save Changes'}</>}
+            </button>
+          </form>
+        )}
+
+        {/* ── APPEARANCE TAB ───────────────────────────── */}
+        {tab === 'appearance' && (
+          <form onSubmit={saveAppearance} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={cardStyle}>
+              <h2 style={{ ...cardTitle, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Palette size={16} style={{ color: 'var(--accent)' }} />
+                About Page Appearance
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* Linked Mode toggle */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '0.875rem 1rem', borderRadius: '12px',
+                  background: aboutConfig.linkedMode ? 'var(--accent-dim)' : 'var(--bg-3)',
+                  border: `1px solid ${aboutConfig.linkedMode ? 'var(--accent)' : 'var(--border)'}`,
+                  transition: 'all 0.2s',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {aboutConfig.linkedMode
+                      ? <Link2 size={15} style={{ color: 'var(--accent)' }} />
+                      : <Unlink size={15} style={{ color: 'var(--text-3)' }} />}
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)' }}>Linked Mode</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '1px' }}>
+                        {aboutConfig.linkedMode
+                          ? 'When using Image background, profile image is synced automatically'
+                          : 'Background and profile image are independent'}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    style={toggleStyle(aboutConfig.linkedMode)}
+                    onClick={() => updateConfig({ linkedMode: !aboutConfig.linkedMode })}
+                  >
+                    <span style={toggleKnobStyle(aboutConfig.linkedMode)} />
+                  </button>
+                </div>
+
+                {/* Background Type */}
+                <FormField label="Background Type">
+                  <select
+                    style={inputCss}
+                    value={aboutConfig.backgroundType}
+                    onChange={e => updateConfig({ backgroundType: e.target.value as 'gradient' | 'image' })}
+                  >
+                    <option value="gradient">Gradient / CSS</option>
+                    <option value="image">Image URL</option>
+                  </select>
+                </FormField>
+
+                {/* Background Value */}
+                <FormField label={aboutConfig.backgroundType === 'gradient' ? 'Gradient CSS Value' : 'Background Image URL'}>
+                  <input
+                    style={inputCss}
+                    value={aboutConfig.backgroundValue}
+                    onChange={e => updateConfig({ backgroundValue: e.target.value })}
+                    placeholder={aboutConfig.backgroundType === 'gradient'
+                      ? 'e.g. linear-gradient(135deg, #0b0f17, #1a1a2e)'
+                      : 'https://res.cloudinary.com/...'}
+                  />
+                </FormField>
+
+                {/* Background Preview */}
+                {aboutConfig.backgroundValue && (
+                  <div style={{
+                    ...previewBox,
+                    height: 80,
+                    ...(aboutConfig.backgroundType === 'gradient'
+                      ? { background: aboutConfig.backgroundValue }
+                      : { backgroundImage: `url(${aboutConfig.backgroundValue})`, backgroundSize: 'cover', backgroundPosition: 'center' }),
+                  }}>
+                    {aboutConfig.backgroundType === 'image' && (
+                      <span style={{ background: 'rgba(0,0,0,0.5)', padding: '0.25rem 0.5rem', borderRadius: 6, color: '#fff' }}>
+                        Background Preview
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Profile Image */}
+                <FormField label="Profile Image URL">
+                  <input
+                    style={inputCss}
+                    value={aboutConfig.profileImage}
+                    onChange={e => updateConfig({ profileImage: e.target.value })}
+                    placeholder="https://res.cloudinary.com/..."
+                    disabled={aboutConfig.linkedMode && aboutConfig.backgroundType === 'image'}
+                  />
+                  {aboutConfig.linkedMode && aboutConfig.backgroundType === 'image' && (
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.35rem' }}>
+                      Linked Mode is on — profile image syncs automatically from the background URL.
+                    </p>
+                  )}
+                </FormField>
+
+                {/* Profile Image Preview */}
+                {aboutConfig.profileImage && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ ...previewBox, width: 80, height: 96, flexShrink: 0, borderRadius: '10px' }}>
+                      <img src={aboutConfig.profileImage} alt="Profile preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-3)' }}>
+                      <Image size={13} />
+                      Profile image preview
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button type="submit" disabled={savingAppearance} style={saveBtn(savedAppearance, savingAppearance)}>
+              {savedAppearance
+                ? <><CheckCircle size={16} /> Saved!</>
+                : <><Save size={16} /> {savingAppearance ? 'Saving…' : 'Save Appearance'}</>}
             </button>
           </form>
         )}
@@ -312,12 +497,22 @@ export default function AdminAbout() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {skills.map(sg => (
                 <div key={sg.id} style={{ padding: '1.25rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
                     <p style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.375rem' }}>{sg.category}</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                      {sg.skills.map(s => (
-                        <span key={s} className="tag" style={{ fontSize: '0.75rem' }}>{s}</span>
-                      ))}
+                      {sg.skills.map(s => {
+                        const isHighlighted = (sg.highlightedSkills ?? []).includes(s);
+                        return (
+                          <span key={s} className="tag" style={isHighlighted ? {
+                            background: 'rgba(99,102,241,0.15)',
+                            border: '1px solid rgba(99,102,241,0.4)',
+                            color: 'var(--accent)',
+                            fontWeight: 600,
+                          } : { fontSize: '0.75rem' }}>
+                            {s}{isHighlighted ? ' ★' : ''}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem', flexShrink: 0 }}>
@@ -379,6 +574,17 @@ export default function AdminAbout() {
         </FormField>
         <FormField label="Skills (comma-separated)" required>
           <input style={inputCss} value={skillInput} onChange={e => setSkillInput(e.target.value)} required placeholder="e.g. Python, SQL, Pandas" />
+        </FormField>
+        <FormField label="Highlighted Skills (comma-separated — must match skill names exactly)">
+          <input
+            style={inputCss}
+            value={highlightInput}
+            onChange={e => setHighlightInput(e.target.value)}
+            placeholder="e.g. Python, SQL"
+          />
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.35rem' }}>
+            Highlighted skills appear first with an accent glow on the About page.
+          </p>
         </FormField>
         <div style={{ display: 'flex', gap: '2rem' }}>
           <FormField label="Order">

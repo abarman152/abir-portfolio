@@ -167,6 +167,23 @@ The CMS lives at `/admin` and is protected by JWT authentication. It provides fu
 
 ---
 
+## Documentation
+
+Full technical documentation is in the [`docs/`](./docs/) directory.
+
+| Document | Description |
+|---|---|
+| [Architecture](./docs/architecture.md) | System design, stack, layer boundaries, auth flow |
+| [API Reference](./docs/api.md) | All REST endpoints, auth requirements, request/response shapes |
+| [Database Schema](./docs/database.md) | All Prisma models, fields, and types |
+| [Environment Variables](./docs/environment.md) | All required env vars for backend and frontend |
+| [Development Guide](./docs/development.md) | Local setup, scripts, and contribution workflow |
+| [Deployment Guide](./docs/deployment.md) | Vercel, Render, Supabase, Cloudinary setup |
+| [Admin Panel](./docs/admin.md) | CMS usage and content management reference |
+| [Design System](./docs/design-system.md) | Tokens, typography, animation, and component guidelines |
+
+---
+
 ## License
 
 MIT — see [LICENSE](./LICENSE)

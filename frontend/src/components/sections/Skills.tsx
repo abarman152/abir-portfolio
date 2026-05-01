@@ -20,21 +20,21 @@ const SKILL_PROJECTS: Record<string, string> = {
 };
 
 const DEFAULT_SKILLS: Skill[] = [
-  { id: '1',  name: 'Python',                 level: 95, category: 'Data Science', icon: '', order: 1 },
-  { id: '2',  name: 'Pandas / NumPy',         level: 92, category: 'Data Science', icon: '', order: 2 },
-  { id: '3',  name: 'Data Visualization',     level: 88, category: 'Data Science', icon: '', order: 3 },
-  { id: '4',  name: 'SQL',                    level: 85, category: 'Data Science', icon: '', order: 4 },
-  { id: '5',  name: 'Statistics & Probability', level: 82, category: 'Data Science', icon: '', order: 5 },
-  { id: '6',  name: 'TensorFlow / PyTorch',   level: 85, category: 'ML', icon: '', order: 1 },
-  { id: '7',  name: 'Scikit-learn',           level: 92, category: 'ML', icon: '', order: 2 },
-  { id: '8',  name: 'NLP',                   level: 80, category: 'ML', icon: '', order: 3 },
-  { id: '9',  name: 'Computer Vision',        level: 78, category: 'ML', icon: '', order: 4 },
-  { id: '10', name: 'Federated Learning',     level: 75, category: 'ML', icon: '', order: 5 },
-  { id: '11', name: 'REST APIs',         level: 90, category: 'Backend', icon: '', order: 1 },
-  { id: '12', name: 'Docker',           level: 85, category: 'Backend', icon: '', order: 2 },
-  { id: '13', name: 'PostgreSQL',       level: 82, category: 'Backend', icon: '', order: 3 },
-  { id: '14', name: 'CI/CD',           level: 75, category: 'Backend', icon: '', order: 4 },
-  { id: '15', name: 'Model Deployment', level: 78, category: 'Backend', icon: '', order: 5 },
+  { id: '1',  name: 'Python',                   level: 95, category: 'Data Science', icon: '', order: 1, isHighlighted: false },
+  { id: '2',  name: 'Pandas / NumPy',           level: 92, category: 'Data Science', icon: '', order: 2, isHighlighted: false },
+  { id: '3',  name: 'Data Visualization',       level: 88, category: 'Data Science', icon: '', order: 3, isHighlighted: false },
+  { id: '4',  name: 'SQL',                      level: 85, category: 'Data Science', icon: '', order: 4, isHighlighted: false },
+  { id: '5',  name: 'Statistics & Probability', level: 82, category: 'Data Science', icon: '', order: 5, isHighlighted: false },
+  { id: '6',  name: 'TensorFlow / PyTorch',     level: 85, category: 'ML',           icon: '', order: 1, isHighlighted: false },
+  { id: '7',  name: 'Scikit-learn',             level: 92, category: 'ML',           icon: '', order: 2, isHighlighted: false },
+  { id: '8',  name: 'NLP',                      level: 80, category: 'ML',           icon: '', order: 3, isHighlighted: false },
+  { id: '9',  name: 'Computer Vision',          level: 78, category: 'ML',           icon: '', order: 4, isHighlighted: false },
+  { id: '10', name: 'Federated Learning',       level: 75, category: 'ML',           icon: '', order: 5, isHighlighted: false },
+  { id: '11', name: 'REST APIs',                level: 90, category: 'Backend',      icon: '', order: 1, isHighlighted: false },
+  { id: '12', name: 'Docker',                   level: 85, category: 'Backend',      icon: '', order: 2, isHighlighted: false },
+  { id: '13', name: 'PostgreSQL',               level: 82, category: 'Backend',      icon: '', order: 3, isHighlighted: false },
+  { id: '14', name: 'CI/CD',                    level: 75, category: 'Backend',      icon: '', order: 4, isHighlighted: false },
+  { id: '15', name: 'Model Deployment',         level: 78, category: 'Backend',      icon: '', order: 5, isHighlighted: false },
 ];
 
 export default function Skills({ skills }: { skills: Skill[] }) {

@@ -1,8 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, Award, GraduationCap } from 'lucide-react';
-import type { AboutProfile, Education, AboutSkillGroup, Achievement } from '@/lib/types';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Phone, Mail, MapPin, Award, GraduationCap, ArrowRight, GitFork, ExternalLink } from 'lucide-react';
+import type { AboutProfile, AboutConfig, Education, AboutSkillGroup, Achievement, Project } from '@/lib/types';
 
 function LinkedInIcon({ size = 18 }: { size?: number }) {
   return (
@@ -36,11 +38,88 @@ function CodeChefIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+const ACCENT_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+
+function ProjectCard({ project, index }: { project: Project; index: number }) {
+  const router = useRouter();
+  const color = ACCENT_COLORS[index % ACCENT_COLORS.length];
+  const href = `/projects/${project.slug}`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.35, delay: index * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }}
+      className="card"
+      onClick={(e) => { if ((e.target as HTMLElement).closest('a, button')) return; router.push(href); }}
+      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer' }}
+    >
+      <div style={{ height: '3px', background: color, flexShrink: 0 }} />
+      <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '9px', background: color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 16, height: 16, borderRadius: '3px', background: color + '80' }} />
+          </div>
+          {project.featured && (
+            <span style={{ padding: '0.18rem 0.5rem', borderRadius: '5px', background: color + '15', border: `1px solid ${color}33`, color, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em' }}>
+              FEATURED
+            </span>
+          )}
+        </div>
+
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>
+          {project.title}
+        </h3>
+
+        <p style={{ fontSize: '0.83rem', color: 'var(--text-2)', lineHeight: 1.65, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {project.description}
+        </p>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: 'auto' }}>
+          {(project.techStack ?? []).slice(0, 4).map(tech => (
+            <span key={tech} className="tag">{tech}</span>
+          ))}
+          {(project.techStack ?? []).length > 4 && (
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', alignSelf: 'center' }}>
+              +{(project.techStack ?? []).length - 4}
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+          <Link href={href} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color, textDecoration: 'none' }}>
+            Case Study <ArrowRight size={12} />
+          </Link>
+          <div style={{ display: 'flex', gap: '0.75rem', marginLeft: 'auto' }}>
+            {project.githubUrl && (
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-3)', transition: 'color 0.15s' }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}>
+                <GitFork size={15} />
+              </a>
+            )}
+            {project.liveUrl && (
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-3)', transition: 'color 0.15s' }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-3)')}>
+                <ExternalLink size={15} />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 interface Props {
   profile: AboutProfile;
   education: Education[];
   skillGroups: AboutSkillGroup[];
   achievements: Achievement[];
+  projects: Project[];
+  aboutConfig: AboutConfig;
 }
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
@@ -67,28 +146,35 @@ const SECTION_WRAP: React.CSSProperties = {
   padding: '0 2rem',
 };
 
-export default function AboutPageContent({ profile, education, skillGroups, achievements }: Props) {
+export default function AboutPageContent({ profile, education, skillGroups, achievements, projects, aboutConfig }: Props) {
   const socialLinks = [
-    { icon: Phone,        label: 'Phone',    href: profile.phone    ? `tel:${profile.phone}`         : '' },
-    { icon: Mail,         label: 'Email',    href: profile.email    ? `mailto:${profile.email}`       : '' },
+    { icon: Phone,        label: 'Phone',    href: profile.phone       ? `tel:${profile.phone}`         : '' },
+    { icon: Mail,         label: 'Email',    href: profile.email       ? `mailto:${profile.email}`       : '' },
     { icon: LinkedInIcon, label: 'LinkedIn', href: profile.linkedinUrl || '' },
     { icon: GitHubIcon,   label: 'GitHub',   href: profile.githubUrl   || '' },
     { icon: LeetCodeIcon, label: 'LeetCode', href: profile.leetcodeUrl  || '' },
     { icon: CodeChefIcon, label: 'CodeChef', href: profile.codechefUrl  || '' },
   ].filter(l => l.href);
 
+  const headerBg: React.CSSProperties =
+    aboutConfig.backgroundType === 'image' && aboutConfig.backgroundValue
+      ? { backgroundImage: `url(${aboutConfig.backgroundValue})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : aboutConfig.backgroundType === 'gradient' && aboutConfig.backgroundValue
+        ? { background: aboutConfig.backgroundValue }
+        : { background: 'var(--bg-2)' };
+
+  const profileImage = aboutConfig.profileImage;
+
   return (
     <div style={{ paddingTop: '60px', minHeight: '100vh', background: 'var(--bg)' }}>
 
       {/* ── HEADER ──────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border)', padding: '5rem 0 4.5rem' }}>
+      <section style={{ ...headerBg, borderBottom: '1px solid var(--border)', padding: '5rem 0 4.5rem' }}>
         <div style={SECTION_WRAP}>
           <div className="about-page-header">
 
             {/* Left: identity */}
             <div style={{ minWidth: 0 }}>
-
-              {/* Eyebrow */}
               <motion.span
                 {...fadeUp(0)}
                 style={{ display: 'inline-block', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '1.5rem' }}
@@ -96,22 +182,13 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
                 Portfolio · About
               </motion.span>
 
-              {/* Name — hero-level */}
               <motion.h1
                 {...fadeUp(0.07)}
-                style={{
-                  fontSize: 'clamp(2.4rem, 5vw, 3.5rem)',
-                  fontWeight: 900,
-                  lineHeight: 1.05,
-                  letterSpacing: '-0.04em',
-                  color: 'var(--text)',
-                  marginBottom: '1rem',
-                }}
+                style={{ fontSize: 'clamp(2.4rem, 5vw, 3.5rem)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.04em', color: 'var(--text)', marginBottom: '1rem' }}
               >
                 {profile.name}
               </motion.h1>
 
-              {/* Title */}
               <motion.p
                 {...fadeUp(0.13)}
                 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}
@@ -119,26 +196,15 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
                 {profile.title}
               </motion.p>
 
-              {/* Subtitle — two lines split on " | " */}
-              <motion.div
-                {...fadeUp(0.18)}
-                style={{ marginBottom: '2.5rem' }}
-              >
+              <motion.div {...fadeUp(0.18)} style={{ marginBottom: '2.5rem' }}>
                 {(profile.subtitle || '').split('|').map((line, i) => (
-                  <p
-                    key={i}
-                    style={{ fontSize: '0.875rem', color: 'var(--text-3)', lineHeight: 1.7, fontWeight: 400 }}
-                  >
+                  <p key={i} style={{ fontSize: '0.875rem', color: 'var(--text-3)', lineHeight: 1.7, fontWeight: 400 }}>
                     {line.trim()}
                   </p>
                 ))}
               </motion.div>
 
-              {/* Social icon row */}
-              <motion.div
-                {...fadeUp(0.24)}
-                style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}
-              >
+              <motion.div {...fadeUp(0.24)} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {socialLinks.map(({ icon: Icon, label, href }, i) => (
                   <a
                     key={i}
@@ -155,7 +221,7 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
               </motion.div>
             </div>
 
-            {/* Right: Primary photo */}
+            {/* Right: profile photo */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -164,14 +230,14 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
               className="about-page-photo"
             >
               <div style={{ width: '180px', height: '215px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-3)', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '0.5rem' }}>
-                {profile.primaryPhoto ? (
-                  <img src={profile.primaryPhoto} alt={profile.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                {profileImage ? (
+                  <img src={profileImage} alt={profile.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 ) : (
                   <>
                     <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>
                       {profile.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', textAlign: 'center', padding: '0 0.5rem' }}>Add photo in Admin</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', textAlign: 'center', padding: '0 0.5rem' }}>Set photo in Admin → About → Appearance</span>
                   </>
                 )}
               </div>
@@ -208,24 +274,19 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
 
             <div style={{ position: 'relative', paddingLeft: '2rem' }}>
               <div style={{ position: 'absolute', left: '6px', top: '10px', bottom: '10px', width: '1px', background: 'var(--border)' }} />
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2.25rem' }}>
                 {education.map((edu, i) => (
                   <motion.div key={edu.id} {...fadeUp(i * 0.1)} style={{ position: 'relative' }}>
                     <div style={{ position: 'absolute', left: '-1.875rem', top: '5px', width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent)', border: '2px solid var(--bg-2)', boxShadow: '0 0 0 3px rgba(99,102,241,0.18)' }} />
-
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.25rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <GraduationCap size={15} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                        <h3 style={{ fontSize: '0.975rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>
-                          {edu.degree}
-                        </h3>
+                        <h3 style={{ fontSize: '0.975rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>{edu.degree}</h3>
                       </div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', background: 'var(--bg-3)', border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: '6px', whiteSpace: 'nowrap' }}>
                         {edu.startDate} – {edu.endDate}
                       </span>
                     </div>
-
                     <p style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: 500, marginBottom: '0.15rem', marginLeft: '1.5rem' }}>
                       {edu.institution}
                     </p>
@@ -252,7 +313,6 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
         <section style={{ background: 'var(--bg)', padding: '3.5rem 0', borderBottom: '1px solid var(--border)' }}>
           <div style={SECTION_WRAP}>
             <motion.span {...fadeUp(0)} style={SECTION_LABEL}>Key Achievements</motion.span>
-
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
               {achievements.map((ach, i) => (
                 <motion.div
@@ -287,30 +347,76 @@ export default function AboutPageContent({ profile, education, skillGroups, achi
         </section>
       )}
 
+      {/* ── FEATURED PROJECTS ───────────────────────────────────── */}
+      {profile.showProjects && projects.length > 0 && (
+        <section style={{ background: 'var(--bg-2)', padding: '3.5rem 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={SECTION_WRAP}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+              <motion.span {...fadeUp(0)} style={{ ...SECTION_LABEL, marginBottom: 0 }}>Featured Projects</motion.span>
+              <motion.div {...fadeUp(0.05)}>
+                <Link
+                  href="/projects"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)', textDecoration: 'none', padding: '0.4rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(99,102,241,0.3)', background: 'rgba(99,102,241,0.06)', transition: 'background 0.15s' }}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.12)')}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.06)')}
+                >
+                  View All <ArrowRight size={12} />
+                </Link>
+              </motion.div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+              {projects.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── SKILLS ──────────────────────────────────────────────── */}
       {profile.showSkills && skillGroups.length > 0 && (
-        <section style={{ background: 'var(--bg-2)', padding: '3.5rem 0 4rem' }}>
+        <section style={{ background: 'var(--bg)', padding: '3.5rem 0 4rem' }}>
           <div style={SECTION_WRAP}>
             <motion.span {...fadeUp(0)} style={SECTION_LABEL}>Skills</motion.span>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {skillGroups.map((group, i) => (
-                <motion.div
-                  key={group.id}
-                  {...fadeUp(i * 0.06)}
-                  style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '1rem', alignItems: 'flex-start', paddingBottom: '1rem', borderBottom: i < skillGroups.length - 1 ? '1px solid var(--border)' : 'none' }}
-                  className="about-skill-row"
-                >
-                  <span style={{ fontSize: '0.775rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', paddingTop: '0.2rem' }}>
-                    {group.category}
-                  </span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                    {group.skills.map(skill => (
-                      <span key={skill} className="tag">{skill}</span>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
+              {skillGroups.map((group, i) => {
+                const highlighted = new Set(group.highlightedSkills ?? []);
+                const sorted = [...group.skills].sort((a, b) => {
+                  const aH = highlighted.has(a) ? 1 : 0;
+                  const bH = highlighted.has(b) ? 1 : 0;
+                  return bH - aH;
+                });
+                return (
+                  <motion.div
+                    key={group.id}
+                    {...fadeUp(i * 0.06)}
+                    style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '1rem', alignItems: 'flex-start', paddingBottom: '1rem', borderBottom: i < skillGroups.length - 1 ? '1px solid var(--border)' : 'none' }}
+                    className="about-skill-row"
+                  >
+                    <span style={{ fontSize: '0.775rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', paddingTop: '0.2rem' }}>
+                      {group.category}
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {sorted.map(skill => {
+                        const isHighlighted = highlighted.has(skill);
+                        return (
+                          <span
+                            key={skill}
+                            className="tag"
+                            style={isHighlighted ? {
+                              background: 'rgba(99,102,241,0.15)',
+                              border: '1px solid rgba(99,102,241,0.4)',
+                              color: 'var(--accent)',
+                              fontWeight: 600,
+                              boxShadow: '0 0 8px rgba(99,102,241,0.2)',
+                            } : {}}
+                          >
+                            {skill}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>

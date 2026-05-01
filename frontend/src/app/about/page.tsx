@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AboutPageContent from '@/components/sections/AboutPageContent';
-import type { AboutProfile, Education, AboutSkillGroup, Achievement } from '@/lib/types';
+import type { AboutProfile, AboutConfig, Education, AboutSkillGroup, Achievement, Project, SiteSettings } from '@/lib/types';
 
 export const metadata: Metadata = {
   title: 'About — Abir Barman',
@@ -14,11 +14,18 @@ export const dynamic = 'force-dynamic';
 
 async function safe<T>(url: string, fallback: T): Promise<T> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (!res.ok) return fallback;
     return res.json();
   } catch { return fallback; }
 }
+
+const DEFAULT_ABOUT_CONFIG: AboutConfig = {
+  backgroundType: 'gradient',
+  backgroundValue: '',
+  profileImage: '',
+  linkedMode: true,
+};
 
 const DEFAULT_PROFILE: AboutProfile = {
   id: '1',
@@ -33,11 +40,10 @@ const DEFAULT_PROFILE: AboutProfile = {
   leetcodeUrl: 'https://leetcode.com/u/abirbarman/',
   codechefUrl: 'https://www.codechef.com/users/abirbarman',
   location: 'India',
-  primaryPhoto: '',
-  secondaryPhoto: '',
   showSummary: true,
   showEducation: true,
   showAchievements: true,
+  showProjects: true,
   showSkills: true,
 };
 
@@ -47,28 +53,25 @@ const DEFAULT_EDUCATION: Education[] = [
 ];
 
 const DEFAULT_SKILL_GROUPS: AboutSkillGroup[] = [
-  { id: 's1', category: 'Programming', skills: ['Python', 'SQL'], order: 1, visible: true },
-  { id: 's2', category: 'Data Processing', skills: ['Data Cleaning', 'Data Transformation', 'Data Validation', 'CSV/JSON'], order: 2, visible: true },
-  { id: 's3', category: 'Analytics Tools', skills: ['Microsoft Excel', 'Power BI'], order: 3, visible: true },
-  { id: 's4', category: 'Databases', skills: ['PostgreSQL', 'RDBMS fundamentals'], order: 4, visible: true },
-  { id: 's5', category: 'Development Tools', skills: ['Git', 'GitHub'], order: 5, visible: true },
-  { id: 's6', category: 'Core Competencies', skills: ['Data Analysis', 'Reporting', 'Automation', 'Problem Solving', 'Attention to Detail'], order: 6, visible: true },
-];
-
-const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: 'a1', slug: 'intl-best-researcher-award', title: 'International Best Researcher Award', description: 'Recognized at the Asia Research Award 2025 for outstanding contributions to data science and analytics research at an international level.', overviewMd: '', date: '2025-01-01', issuer: 'Asia Research Award 2025', imageUrl: '', badgeIcon: '', images: [], category: 'Award', tags: ['Research', 'International'], featured: true, visible: true, order: 1, createdAt: '', updatedAt: '' },
-  { id: 'a2', slug: 'american-chamber-of-research', title: 'Membership, American Chamber of Research', description: 'Inducted as a member recognizing contributions to research and innovation in computer science and data analytics.', overviewMd: '', date: '2025-01-01', issuer: 'American Chamber of Research', imageUrl: '', badgeIcon: '', images: [], category: 'Professional', tags: ['Research', 'Membership'], featured: false, visible: true, order: 2, createdAt: '', updatedAt: '' },
+  { id: 's1', category: 'Programming', skills: ['Python', 'SQL'], highlightedSkills: ['Python'], order: 1, visible: true },
+  { id: 's2', category: 'Data Processing', skills: ['Data Cleaning', 'Data Transformation', 'Data Validation', 'CSV/JSON'], highlightedSkills: [], order: 2, visible: true },
+  { id: 's3', category: 'Analytics Tools', skills: ['Microsoft Excel', 'Power BI'], highlightedSkills: ['Power BI'], order: 3, visible: true },
+  { id: 's4', category: 'Databases', skills: ['PostgreSQL', 'RDBMS fundamentals'], highlightedSkills: [], order: 4, visible: true },
+  { id: 's5', category: 'Development Tools', skills: ['Git', 'GitHub'], highlightedSkills: [], order: 5, visible: true },
+  { id: 's6', category: 'Core Competencies', skills: ['Data Analysis', 'Reporting', 'Automation', 'Problem Solving', 'Attention to Detail'], highlightedSkills: [], order: 6, visible: true },
 ];
 
 export default async function AboutPage() {
-  const [profile, education, skillGroups, achievements] = await Promise.all([
+  const [profile, education, skillGroups, achievements, projects, settings] = await Promise.all([
     safe<AboutProfile>(`${API}/about/profile`, DEFAULT_PROFILE),
     safe<Education[]>(`${API}/about/education`, DEFAULT_EDUCATION),
     safe<AboutSkillGroup[]>(`${API}/about/skills`, DEFAULT_SKILL_GROUPS),
-    safe<Achievement[]>(`${API}/achievements/featured`, DEFAULT_ACHIEVEMENTS),
+    safe<Achievement[]>(`${API}/achievements/featured`, []),
+    safe<Project[]>(`${API}/projects/featured`, []),
+    safe<SiteSettings>(`${API}/settings`, { id: '', defaultTheme: 'dark', accentColor: '#6366f1', metaTitle: '', metaDesc: '', ogImageUrl: '', heroConfig: { backgroundType: 'gradient', backgroundValue: '', profileImage: '', themeImages: {}, linkedMode: true }, aboutConfig: DEFAULT_ABOUT_CONFIG }),
   ]);
 
-  const visibleAchievements = achievements.filter(a => a.visible);
+  const aboutConfig = settings.aboutConfig ?? DEFAULT_ABOUT_CONFIG;
 
   return (
     <>
@@ -77,7 +80,9 @@ export default async function AboutPage() {
         profile={profile}
         education={education}
         skillGroups={skillGroups}
-        achievements={visibleAchievements.length > 0 ? visibleAchievements : DEFAULT_ACHIEVEMENTS}
+        achievements={achievements.filter(a => a.visible).slice(0, 4)}
+        projects={projects.slice(0, 3)}
+        aboutConfig={aboutConfig}
       />
       <Footer />
     </>
