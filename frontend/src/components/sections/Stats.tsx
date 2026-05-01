@@ -31,7 +31,7 @@ function Counter({ target, suffix }: { target: number; suffix: string }) {
     return () => clearInterval(t);
   }, [inView, target]);
 
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+  return <span ref={ref}>{count.toLocaleString('en-US')}{suffix}</span>;
 }
 
 const DEFAULT_STATS: Stat[] = [

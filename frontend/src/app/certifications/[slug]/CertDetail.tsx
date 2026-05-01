@@ -8,6 +8,7 @@ import { ArrowLeft, ExternalLink, Calendar, Star, Award, Hash, Shield } from 'lu
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { Certification } from '@/lib/types';
+import { fmtFullDate } from '@/lib/date';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -19,10 +20,6 @@ function Md({ children }: { children: string }) {
   );
 }
 
-function fmtDate(iso: string): string {
-  try { return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
-  catch { return iso; }
-}
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -93,7 +90,7 @@ export default function CertDetail({ cert }: { cert: Certification }) {
               </span>
               {cert.issueDate && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', color: 'var(--text-3)' }}>
-                  <Calendar size={12} /> {fmtDate(cert.issueDate)}
+                  <Calendar size={12} /> {fmtFullDate(cert.issueDate)}
                 </span>
               )}
               <span style={{ padding: '0.2rem 0.6rem', borderRadius: '5px', fontSize: '0.75rem', fontWeight: 600, background: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid rgba(99,102,241,0.2)' }}>
@@ -194,7 +191,7 @@ export default function CertDetail({ cert }: { cert: Certification }) {
                   <p style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Issued</p>
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Calendar size={13} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    {fmtDate(cert.issueDate)}
+                    {fmtFullDate(cert.issueDate)}
                   </p>
                 </div>
 
@@ -274,7 +271,7 @@ export default function CertDetail({ cert }: { cert: Certification }) {
                 </div>
                 <div>
                   <p style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Issued</p>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-2)' }}>{fmtDate(cert.issueDate)}</p>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-2)' }}>{fmtFullDate(cert.issueDate)}</p>
                 </div>
                 {cert.credentialUrl && (
                   <div>
@@ -327,7 +324,7 @@ export default function CertDetail({ cert }: { cert: Certification }) {
               </div>
               <div style={{ padding: '1.125rem', borderRadius: '12px', background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
                 <p style={{ fontSize: '0.66rem', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Issued On</p>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text)', fontWeight: 500 }}>{fmtDate(cert.issueDate)}</p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text)', fontWeight: 500 }}>{fmtFullDate(cert.issueDate)}</p>
               </div>
               {cert.credentialId && (
                 <div style={{ padding: '1.125rem', borderRadius: '12px', background: 'var(--bg-2)', border: '1px solid var(--border)' }}>

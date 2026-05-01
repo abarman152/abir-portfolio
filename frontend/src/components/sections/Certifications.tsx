@@ -5,6 +5,7 @@ import { Award, ExternalLink, Calendar, Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import type { Certification } from '@/lib/types';
+import { fmtMonthYearShort } from '@/lib/date';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -95,7 +96,7 @@ function CertCard({ cert }: { cert: Certification }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-3)', fontSize: '0.78rem' }}>
           <Calendar size={11} />
-          {new Date(cert.issueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+          {fmtMonthYearShort(cert.issueDate)}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <span className="tag" style={{ fontSize: '0.68rem', color: 'var(--accent)' }}>{cert.category}</span>

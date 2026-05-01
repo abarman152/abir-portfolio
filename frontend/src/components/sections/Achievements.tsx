@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Star, GraduationCap, Zap, Users, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Achievement } from '@/lib/types';
+import { fmtMonthYearShort } from '@/lib/date';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -94,7 +95,7 @@ function AchievementCard({ item, i }: { item: Achievement; i: number }) {
               {item.category}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
-              {new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {fmtMonthYearShort(item.date)}
             </span>
           </div>
         </div>
