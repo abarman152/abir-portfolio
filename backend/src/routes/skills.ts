@@ -49,7 +49,7 @@ router.post('/', authenticate, async (req, res) => {
 
 router.put('/:id', authenticate, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, level, category, categoryId, icon, order, isHighlighted } = req.body as {
       name?: string; level?: number; category?: string; categoryId?: string | null;
       icon?: string; order?: number; isHighlighted?: boolean;
@@ -80,7 +80,7 @@ router.put('/:id', authenticate, async (req, res) => {
 
 router.delete('/:id', authenticate, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     await prisma.skill.delete({ where: { id } });
     res.json({ message: 'Deleted' });
   } catch (err: unknown) {

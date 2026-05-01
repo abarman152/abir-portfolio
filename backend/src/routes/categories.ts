@@ -32,7 +32,7 @@ router.post('/', authenticate, async (req, res) => {
 
 router.put('/:id', authenticate, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, order } = req.body as { name?: string; order?: number };
     const data: { name?: string; order?: number } = {};
     if (name !== undefined) data.name = name.trim();
@@ -57,7 +57,7 @@ router.put('/:id', authenticate, async (req, res) => {
 
 router.delete('/:id', authenticate, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     await prisma.skill.updateMany({ where: { categoryId: id }, data: { categoryId: null } });
     await prisma.skillCategory.delete({ where: { id } });
     res.json({ message: 'Deleted' });
