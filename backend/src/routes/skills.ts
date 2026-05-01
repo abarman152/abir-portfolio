@@ -11,7 +11,8 @@ router.get('/', async (_, res) => {
       include: { skills: { orderBy: { order: 'asc' } } },
     });
     res.json({ categories });
-  } catch {
+  } catch (err) {
+    console.error('[skills] GET / error:', err);
     res.status(500).json({ error: 'Failed to fetch skills' });
   }
 });
