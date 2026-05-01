@@ -119,11 +119,7 @@ function StickyGallery({ images, title }: { images: string[]; title: string }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.15, ease: EASE }}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${Math.min(images.length, 4)}, 1fr)`,
-              gap: '0.5rem',
-            }}
+            className="thumb-grid"
           >
             {images.map((url, i) => (
               <button
@@ -385,7 +381,8 @@ export default function AchievementDetail({ item }: { item: Achievement }) {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.2, ease: EASE }}
-              style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '1.25rem', marginLeft: '4rem' }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '1.25rem' }}
+          className="achievement-tags"
             >
               {item.tags.map((tag) => (
                 <span key={tag} className="tag" style={{ fontSize: '0.72rem' }}>{tag}</span>
@@ -466,19 +463,38 @@ export default function AchievementDetail({ item }: { item: Achievement }) {
         </div>
       </main>
 
-      {/* ── Responsive: mobile gallery-first reorder ── */}
       <style>{`
+        /* Thumbnail grid — responsive column count */
+        .thumb-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.5rem;
+        }
+        @media (min-width: 480px) {
+          .thumb-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* Tags — indent on desktop only */
+        @media (min-width: 769px) {
+          .achievement-tags { margin-left: 4rem; }
+        }
+
+        /* Mobile: single column, gallery above content, no sticky */
         @media (max-width: 768px) {
           main > div {
             grid-template-columns: 1fr !important;
+            padding: 1.5rem 1rem 3rem !important;
           }
-          main > div > div:last-child {
-            order: -1;
+          main > div > div:last-child { order: -1; }
+          main > div > div:last-child > div:first-child {
+            position: static !important;
           }
         }
+
+        /* Tablet: narrower gallery column */
         @media (min-width: 769px) and (max-width: 1024px) {
           main > div {
-            grid-template-columns: 1fr 320px !important;
+            grid-template-columns: 1fr 300px !important;
             gap: 2rem !important;
           }
         }

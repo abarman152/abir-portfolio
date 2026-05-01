@@ -61,7 +61,8 @@ export default function Navbar() {
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
           height: '60px',
           display: 'flex', alignItems: 'center',
-          padding: '0 2rem',
+          padding: '0 1rem',
+          overflow: 'hidden',
           background: scrolled ? 'var(--bg-2)' : 'transparent',
           backdropFilter: scrolled ? 'blur(18px)' : 'none',
           borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
@@ -81,7 +82,7 @@ export default function Navbar() {
 
         {/* ── Desktop links ─────────────────────────── */}
         <div
-          style={{ display: 'flex', gap: '0.125rem', alignItems: 'center', flex: 1 }}
+          style={{ gap: '0.125rem', alignItems: 'center', flex: 1 }}
           className="hidden md:flex"
         >
           {navLinks.map((link) => {
@@ -211,7 +212,7 @@ export default function Navbar() {
               position: 'fixed', top: 60, left: 0, right: 0, zIndex: 99,
               background: 'var(--bg-2)', backdropFilter: 'blur(18px)',
               borderBottom: '1px solid var(--border)',
-              padding: '0.75rem 2rem 1.25rem',
+              padding: '0.75rem 1rem 1.25rem',
             }}
           >
             {navLinks.map((link) => {
