@@ -147,9 +147,25 @@ export interface Skill {
   name: string;
   level: number;
   category: string;
+  categoryId?: string | null;
   icon: string;
   order: number;
   isHighlighted: boolean;
+}
+
+export interface SkillCategory {
+  id: string;
+  name: string;
+  order: number;
+  createdAt: string;
+}
+
+export interface SkillCategoryWithSkills extends SkillCategory {
+  skills: Skill[];
+}
+
+export interface SkillsResponse {
+  categories: SkillCategoryWithSkills[];
 }
 
 export interface Stat {

@@ -11,7 +11,7 @@ import Contact from '@/components/sections/Contact';
 import Footer from '@/components/Footer';
 import type {
   HeroContent, SocialLink, HeroBadge, Project, Research as ResearchItem,
-  Certification, Achievement, Skill, Stat, SiteSettings, HeroConfig,
+  Certification, Achievement, SkillsResponse, Stat, SiteSettings, HeroConfig,
 } from '@/lib/types';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
@@ -64,14 +64,14 @@ const DEFAULT_SETTINGS: SiteSettings = {
 const DEFAULT_CERTS: Certification[] = [];
 
 export default async function HomePage() {
-  const [hero, socials, heroBadges, settings, projects, papers, skills, certs, achievements, stats] = await Promise.all([
+  const [hero, socials, heroBadges, settings, projects, papers, skillsData, certs, achievements, stats] = await Promise.all([
     fetchData<HeroContent>('/hero', DEFAULT_HERO),
     fetchData<SocialLink[]>('/social', []),
     fetchData<HeroBadge[]>('/hero-badges', []),
     fetchData<SiteSettings>('/settings', DEFAULT_SETTINGS),
     fetchData<Project[]>('/projects/featured', []),
     fetchData<ResearchItem[]>('/research/featured', []),
-    fetchData<Skill[]>('/skills', []),
+    fetchData<SkillsResponse>('/skills', { categories: [] }),
     fetchData<Certification[]>('/certifications/featured', DEFAULT_CERTS),
     fetchData<Achievement[]>('/achievements/featured', []),
     fetchData<Stat[]>('/stats', []),
@@ -94,7 +94,7 @@ export default async function HomePage() {
         <Projects projects={projects} />
 
         {/* Skills — supporting content, no nav anchor */}
-        <Skills skills={skills} />
+        <Skills categories={skillsData.categories} />
 
         {/* 4. Research */}
         <Research papers={papers} />

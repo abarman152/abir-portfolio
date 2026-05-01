@@ -122,14 +122,24 @@ model Achievement {
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
+model SkillCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  skills    Skill[]
+}
+
 model Skill {
-  id            String  @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String
-  level         Int     @default(80)
+  level         Int            @default(80)
   category      String
-  icon          String  @default("")
-  order         Int     @default(0)
-  isHighlighted Boolean @default(false)
+  categoryId    String?
+  skillCategory SkillCategory? @relation(fields: [categoryId], references: [id])
+  icon          String         @default("")
+  order         Int            @default(0)
+  isHighlighted Boolean        @default(false)
 }
 
 model Stat {
