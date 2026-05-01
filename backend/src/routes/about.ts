@@ -123,4 +123,56 @@ router.delete('/skills/:id', authenticate, async (req, res) => {
   res.json({ success: true });
 });
 
+/* ── Home-page About Section (singleton) ───────────────────── */
+router.get('/section', async (_, res) => {
+  try {
+    let section = await prisma.aboutSection.findFirst();
+    if (!section) section = await prisma.aboutSection.create({ data: {} });
+    res.json(section);
+  } catch (err) {
+    console.error('GET /about/section error:', err);
+    res.status(500).json({ error: 'Failed to fetch about section' });
+  }
+});
+
+router.put('/section', authenticate, async (req, res) => {
+  try {
+    const { headline, highlight, paragraphs, skills, categories } = req.body;
+
+    // Validation
+    if (!headline || typeof headline !== 'string' || !headline.trim()) {
+      return res.status(400).json({ error: 'Headline is required' });
+    }
+    if (!Array.isArray(paragraphs) || paragraphs.length === 0) {
+      return res.status(400).json({ error: 'At least one paragraph is required' });
+    }
+    if (categories && Array.isArray(categories)) {
+      for (const cat of categories) {
+        if (!cat.title || !cat.description) {
+          return res.status(400).json({ error: 'Each category must have a title and description' });
+        }
+      }
+    }
+
+    const existing = await prisma.aboutSection.findFirst();
+    const data = {
+      headline: headline.trim(),
+      highlight: (highlight || '').trim(),
+      paragraphs: paragraphs,
+      skills: Array.isArray(skills) ? skills : [],
+      categories: Array.isArray(categories) ? categories : [],
+    };
+
+    if (existing) {
+      const updated = await prisma.aboutSection.update({ where: { id: existing.id }, data });
+      return res.json(updated);
+    }
+    const created = await prisma.aboutSection.create({ data });
+    res.json(created);
+  } catch (err) {
+    console.error('PUT /about/section error:', err);
+    res.status(500).json({ error: 'Failed to update about section' });
+  }
+});
+
 export default router;

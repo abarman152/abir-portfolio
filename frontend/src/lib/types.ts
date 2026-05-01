@@ -248,6 +248,24 @@ export interface AboutSkillGroup {
   visible: boolean;
 }
 
+export interface AboutCategory {
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  link?: string;
+}
+
+export interface AboutSectionData {
+  id: string;
+  headline: string;
+  highlight: string;
+  paragraphs: string[];
+  skills: string[];
+  categories: AboutCategory[];
+  updatedAt: string;
+}
+
 export interface ContactMessage {
   id: string;
   name: string;

@@ -235,3 +235,13 @@ model NotificationSettings {
   whatsappNumbers  String[] @default([])
   updatedAt        DateTime @updatedAt
 }
+
+model AboutSection {
+  id         String   @id @default(cuid())
+  headline   String   @default("Turning raw data into")
+  highlight  String   @default("decisions that matter.")
+  paragraphs Json     @default("[]")
+  skills     Json     @default("[]")
+  categories Json     @default("[]")
+  updatedAt  DateTime @updatedAt
+}

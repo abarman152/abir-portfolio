@@ -407,6 +407,44 @@ async function main() {
     console.log('NotificationSettings record created (all channels disabled by default)');
   }
 
+  // About Section (Home page)
+  const aboutSectionExists = await prisma.aboutSection.count();
+  if (!aboutSectionExists) {
+    await prisma.aboutSection.create({
+      data: {
+        headline: 'Turning raw data into',
+        highlight: 'decisions that matter.',
+        paragraphs: [
+          "I'm a Data Scientist and ML Engineer who loves the full journey — from exploring messy datasets to shipping production systems that make a measurable difference.",
+          "My work sits at the intersection of machine learning, research, and data storytelling. I build systems that don't just predict — they explain, alert, and act.",
+          "Outside of professional work, I contribute to research in quantum computing, NLP, and evolutionary optimization, compete on platforms like LeetCode and Codeforces, and explore applied AI systems.",
+        ],
+        skills: ['Python', 'PyTorch', 'TensorFlow', 'scikit-learn', 'PostgreSQL', 'Docker', 'Airflow', 'Quantum ML'],
+        categories: [
+          {
+            title: 'Machine Learning',
+            description: 'Designing and deploying ML models that solve real problems — from NLP and computer vision to anomaly detection and forecasting.',
+            icon: 'Brain',
+            color: '#6366f1',
+          },
+          {
+            title: 'Data Engineering',
+            description: 'Building robust data pipelines, ETL systems, and analytics infrastructure that make data reliable and decision-ready.',
+            icon: 'Database',
+            color: '#8b5cf6',
+          },
+          {
+            title: 'Research & Innovation',
+            description: 'Published researcher in quantum-enhanced NLP, post-quantum cryptography, and evolutionary optimization bridging theory with production systems.',
+            icon: 'Lightbulb',
+            color: '#f59e0b',
+          },
+        ],
+      },
+    });
+    console.log('AboutSection seeded with default home-page content');
+  }
+
   console.log('Seed completed successfully!');
 }
 
