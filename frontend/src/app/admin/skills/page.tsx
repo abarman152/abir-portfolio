@@ -122,12 +122,16 @@ export default function AdminSkills() {
   const [skillSaving, setSkillSaving] = useState(false);
 
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const data = await api.get<{ categories: SkillCategoryWithSkills[] }>('/skills', authHeader(getToken()));
       setCategories(data.categories ?? []);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load skills data');
     } finally {
       setLoading(false);
     }
@@ -219,6 +223,25 @@ export default function AdminSkills() {
 
         {loading ? (
           <div style={{ color: 'var(--text-3)', padding: '2rem', textAlign: 'center' }}>Loading…</div>
+        ) : loadError ? (
+          <div style={{
+            padding: '1rem 1.25rem', borderRadius: '10px',
+            background: '#ef444415', border: '1px solid #ef4444',
+            color: '#ef4444', fontSize: '0.875rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+          }}>
+            <span>Error: {loadError}</span>
+            <button
+              onClick={load}
+              style={{
+                padding: '0.35rem 0.75rem', borderRadius: '7px',
+                background: '#ef4444', border: 'none', cursor: 'pointer',
+                color: 'white', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0,
+              }}
+            >
+              Retry
+            </button>
+          </div>
         ) : (
           <>
             {/* ════════════════════════════════════════
