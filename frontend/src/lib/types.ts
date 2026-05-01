@@ -257,3 +257,12 @@ export interface ContactMessage {
   read: boolean;
   createdAt: string;
 }
+
+export interface NotificationSettings {
+  id: string;
+  emailEnabled: boolean;
+  emailRecipients: string[];
+  whatsappEnabled: boolean;
+  whatsappNumbers: string[];
+  updatedAt: string;
+}

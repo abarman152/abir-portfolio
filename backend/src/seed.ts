@@ -400,6 +400,13 @@ async function main() {
     });
   }
 
+  // NotificationSettings — singleton, safe to create once
+  const notifExists = await prisma.notificationSettings.count();
+  if (!notifExists) {
+    await prisma.notificationSettings.create({ data: {} });
+    console.log('NotificationSettings record created (all channels disabled by default)');
+  }
+
   console.log('Seed completed successfully!');
 }
 

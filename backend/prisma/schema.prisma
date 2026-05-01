@@ -226,3 +226,12 @@ model AboutSkillGroup {
   order             Int      @default(0)
   visible           Boolean  @default(true)
 }
+
+model NotificationSettings {
+  id               String   @id @default(cuid())
+  emailEnabled     Boolean  @default(false)
+  emailRecipients  String[] @default([])
+  whatsappEnabled  Boolean  @default(false)
+  whatsappNumbers  String[] @default([])
+  updatedAt        DateTime @updatedAt
+}

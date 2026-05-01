@@ -15,6 +15,7 @@ import contactRoutes from './routes/contact';
 import settingsRoutes from './routes/settings';
 import aboutRoutes from './routes/about';
 import heroBadgeRoutes from './routes/heroBadges';
+import notificationSettingsRoutes from './routes/notificationSettings';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/hero-badges', heroBadgeRoutes);
+app.use('/api/notification-settings', notificationSettingsRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
