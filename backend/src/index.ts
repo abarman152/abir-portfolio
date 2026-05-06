@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import categoryRoutes from './routes/categories';
 import certRoutes from './routes/certifications';
 import contactRoutes from './routes/contact';
+import dashboardRoutes from './routes/dashboard';
 import heroRoutes from './routes/hero';
 import heroBadgeRoutes from './routes/heroBadges';
 import notificationSettingsRoutes from './routes/notificationSettings';
@@ -57,6 +58,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/hero-badges', heroBadgeRoutes);
 app.use('/api/notification-settings', notificationSettingsRoutes);
+app.use('/api/admin/dashboard', dashboardRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 

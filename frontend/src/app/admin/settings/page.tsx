@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Save, CheckCircle, Link2, Unlink, Image, Palette } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
-import type { SiteSettings, HeroContent, HeroConfig } from '@/lib/types';
+import type { HeroConfig, HeroContent, SiteSettings } from '@/lib/types';
+import { motion } from 'framer-motion';
+import { CheckCircle, Eye, EyeOff, Image, Link2, Lock, Palette, Save, Shield, Unlink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const DEFAULT_HERO_CONFIG: HeroConfig = {
   backgroundType: 'gradient',
@@ -17,6 +18,7 @@ const DEFAULT_HERO_CONFIG: HeroConfig = {
 };
 
 export default function AdminSettings() {
+  const router = useRouter();
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [hero, setHero] = useState<Partial<HeroContent>>({});
   const [heroConfig, setHeroConfig] = useState<HeroConfig>(DEFAULT_HERO_CONFIG);
@@ -24,6 +26,65 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
+
+  // Password change state
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwShow, setPwShow] = useState({ current: false, new: false, confirm: false });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess(false);
+
+    if (!pwForm.currentPassword || !pwForm.newPassword || !pwForm.confirmPassword) {
+      setPwError('All fields are required');
+      return;
+    }
+    if (pwForm.newPassword.length < 8) {
+      setPwError('New password must be at least 8 characters');
+      return;
+    }
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwError('New passwords do not match');
+      return;
+    }
+    if (pwForm.currentPassword === pwForm.newPassword) {
+      setPwError('New password must be different from current password');
+      return;
+    }
+
+    setPwSaving(true);
+    try {
+      await api.post<{ message: string }>('/auth/change-password', {
+        currentPassword: pwForm.currentPassword,
+        newPassword: pwForm.newPassword,
+      }, authHeader(token));
+
+      setPwSuccess(true);
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+      // Auto-logout after 2 seconds so admin sees the success message
+      setTimeout(() => {
+        localStorage.removeItem('admin_token');
+        router.replace('/admin/login');
+      }, 2000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update password';
+      // Try to extract backend error message
+      if (msg.includes('401')) {
+        setPwError('Current password is incorrect');
+      } else if (msg.includes('400')) {
+        setPwError('Invalid request. Check your input.');
+      } else {
+        setPwError(msg);
+      }
+    } finally {
+      setPwSaving(false);
+    }
+  };
 
   useEffect(() => {
     const headers = authHeader(token);
@@ -397,6 +458,145 @@ export default function AdminSettings() {
             }}
           >
             {saved ? <><CheckCircle size={16} /> Saved!</> : <><Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}</>}
+          </motion.button>
+        </form>
+
+        {/* ─── Security: Change Password ─────────────────────── */}
+        <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
+          <div style={cardStyle}>
+            <h2 style={sectionTitle}>
+              <Shield size={18} style={{ color: 'var(--accent)' }} />
+              Security
+            </h2>
+            <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', marginBottom: '1.25rem' }}>
+              Update your admin password. You will be logged out after a successful change.
+            </p>
+
+            {pwError && (
+              <div style={{
+                padding: '0.75rem 1rem', borderRadius: '10px', marginBottom: '1rem',
+                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                color: '#ef4444', fontSize: '0.85rem', fontWeight: 500,
+              }}>
+                {pwError}
+              </div>
+            )}
+
+            {pwSuccess && (
+              <div style={{
+                padding: '0.75rem 1rem', borderRadius: '10px', marginBottom: '1rem',
+                background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
+                color: '#10b981', fontSize: '0.85rem', fontWeight: 500,
+              }}>
+                Password updated successfully. Redirecting to login...
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <FormField label="Current Password" required>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} style={{
+                    position: 'absolute', left: '0.75rem', top: '50%',
+                    transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none',
+                  }} />
+                  <input
+                    type={pwShow.current ? 'text' : 'password'}
+                    value={pwForm.currentPassword}
+                    onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })}
+                    placeholder="Enter current password"
+                    style={{ ...inputCss, paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPwShow({ ...pwShow, current: !pwShow.current })}
+                    style={{
+                      position: 'absolute', right: '0.75rem', top: '50%',
+                      transform: 'translateY(-50%)', background: 'none',
+                      border: 'none', cursor: 'pointer', color: 'var(--text-3)',
+                    }}
+                  >
+                    {pwShow.current ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </FormField>
+
+              <FormField label="New Password" required>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} style={{
+                    position: 'absolute', left: '0.75rem', top: '50%',
+                    transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none',
+                  }} />
+                  <input
+                    type={pwShow.new ? 'text' : 'password'}
+                    value={pwForm.newPassword}
+                    onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                    placeholder="Minimum 8 characters"
+                    style={{ ...inputCss, paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPwShow({ ...pwShow, new: !pwShow.new })}
+                    style={{
+                      position: 'absolute', right: '0.75rem', top: '50%',
+                      transform: 'translateY(-50%)', background: 'none',
+                      border: 'none', cursor: 'pointer', color: 'var(--text-3)',
+                    }}
+                  >
+                    {pwShow.new ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </FormField>
+
+              <FormField label="Confirm New Password" required>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} style={{
+                    position: 'absolute', left: '0.75rem', top: '50%',
+                    transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none',
+                  }} />
+                  <input
+                    type={pwShow.confirm ? 'text' : 'password'}
+                    value={pwForm.confirmPassword}
+                    onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+                    placeholder="Re-enter new password"
+                    style={{ ...inputCss, paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPwShow({ ...pwShow, confirm: !pwShow.confirm })}
+                    style={{
+                      position: 'absolute', right: '0.75rem', top: '50%',
+                      transform: 'translateY(-50%)', background: 'none',
+                      border: 'none', cursor: 'pointer', color: 'var(--text-3)',
+                    }}
+                  >
+                    {pwShow.confirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </FormField>
+            </div>
+          </div>
+
+          <motion.button
+            type="submit"
+            disabled={pwSaving || pwSuccess}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              padding: '0.875rem 2rem', borderRadius: '12px', border: 'none',
+              background: pwSuccess
+                ? 'linear-gradient(135deg, #10b981, #059669)'
+                : 'linear-gradient(135deg, #ef4444, #dc2626)',
+              color: 'white', fontSize: '0.95rem', fontWeight: 600,
+              cursor: (pwSaving || pwSuccess) ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              alignSelf: 'flex-start',
+              boxShadow: '0 4px 14px var(--border)',
+              transition: 'background 0.3s',
+              opacity: (pwSaving || pwSuccess) ? 0.7 : 1,
+            }}
+          >
+            {pwSuccess
+              ? <><CheckCircle size={16} /> Updated!</>
+              : <><Shield size={16} /> {pwSaving ? 'Updating...' : 'Change Password'}</>}
           </motion.button>
         </form>
       </div>
