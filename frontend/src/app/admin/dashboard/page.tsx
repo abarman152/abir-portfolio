@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { FolderOpen, BookOpen, Award, Trophy, MessageSquare, TrendingUp, Users, Eye } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import { api, authHeader } from '@/lib/api';
+import { motion } from 'framer-motion';
+import { Award, BookOpen, Eye, FolderOpen, MessageSquare, TrendingUp, Trophy, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface Counts {
   projects: number;
@@ -33,22 +33,19 @@ export default function Dashboard() {
     const token = localStorage.getItem('admin_token') || '';
     const headers = authHeader(token);
 
-    Promise.all([
-      api.get<unknown[]>('/projects', headers),
-      api.get<unknown[]>('/research', headers),
-      api.get<unknown[]>('/certifications', headers),
-      api.get<unknown[]>('/achievements', headers),
-      api.get<{ read: boolean }[]>('/contact', headers),
-    ]).then(([projects, papers, certs, achievements, messages]) => {
-      setCounts({
-        projects: projects.length,
-        papers: papers.length,
-        certs: certs.length,
-        achievements: achievements.length,
-        messages: messages.length,
-        unread: messages.filter((m) => !m.read).length,
-      });
-    }).catch(console.error).finally(() => setLoading(false));
+    api.get<Counts>('/admin/dashboard', headers)
+      .then((data) => {
+        setCounts({
+          projects: data.projects ?? 0,
+          papers: data.papers ?? 0,
+          certs: data.certs ?? 0,
+          achievements: data.achievements ?? 0,
+          messages: data.messages ?? 0,
+          unread: data.unread ?? 0,
+        });
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   return (
