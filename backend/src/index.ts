@@ -1,21 +1,21 @@
-import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
-import heroRoutes from './routes/hero';
-import projectRoutes from './routes/projects';
-import researchRoutes from './routes/research';
-import certRoutes from './routes/certifications';
-import achievementRoutes from './routes/achievements';
-import skillRoutes from './routes/skills';
-import categoryRoutes from './routes/categories';
-import statsRoutes from './routes/stats';
-import socialRoutes from './routes/social';
-import contactRoutes from './routes/contact';
-import settingsRoutes from './routes/settings';
+import express from 'express';
 import aboutRoutes from './routes/about';
+import achievementRoutes from './routes/achievements';
+import authRoutes from './routes/auth';
+import categoryRoutes from './routes/categories';
+import certRoutes from './routes/certifications';
+import contactRoutes from './routes/contact';
+import heroRoutes from './routes/hero';
 import heroBadgeRoutes from './routes/heroBadges';
 import notificationSettingsRoutes from './routes/notificationSettings';
+import projectRoutes from './routes/projects';
+import researchRoutes from './routes/research';
+import settingsRoutes from './routes/settings';
+import skillRoutes from './routes/skills';
+import socialRoutes from './routes/social';
+import statsRoutes from './routes/stats';
 
 dotenv.config();
 
@@ -33,6 +33,14 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Prevent CDN/proxy caching of dynamic API responses
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/hero', heroRoutes);
