@@ -55,3 +55,4 @@ public/uploads/
 .vercel
 .cache/
 *.pem
+*.txt
