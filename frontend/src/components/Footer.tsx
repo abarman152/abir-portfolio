@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import type { SocialLink } from '@/lib/types';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import type { SocialLink } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import ThemeLogo from './ThemeLogo';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
@@ -93,7 +94,7 @@ export default function Footer() {
         {/* Left — Identity */}
         <div>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            <img src="/logo.svg" alt="Abir logo" style={{ width: 28, height: 28, display: 'block' }} />
+            <ThemeLogo width={28} height={28} />
             <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>
               Abir
             </span>

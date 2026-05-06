@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Moon, Sun, Menu, X } from 'lucide-react';
-import { useTheme } from './ThemeProvider';
+import { Menu, Moon, Sun, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import ThemeLogo from './ThemeLogo';
+import { useTheme } from './ThemeProvider';
 
 const navLinks = [
   { href: '/',               label: 'Home' },
@@ -95,7 +96,7 @@ export default function Navbar() {
           href="/"
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', marginRight: '2rem', flexShrink: 0 }}
         >
-          <img src="/logo.svg" alt="Abir logo" style={{ width: 30, height: 30, display: 'block' }} />
+          <ThemeLogo width={30} height={30} priority />
           <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text)', letterSpacing: '-0.01em' }}>
             Abir
           </span>
@@ -268,7 +269,7 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
                 >
-                  <img src="/logo.svg" alt="Abir logo" style={{ width: 26, height: 26 }} />
+                  <ThemeLogo width={26} height={26} />
                   <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>Abir</span>
                 </Link>
                 <button

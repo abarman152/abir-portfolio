@@ -1,14 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  LayoutDashboard, FolderOpen, BookOpen, Award, Trophy,
-  BarChart2, Link2, Settings, MessageSquare, LogOut, Code2,
-  Moon, Sun, Menu, X, TrendingUp, UserCircle, Sparkles, Bell,
+    Award,
+    BarChart2,
+    Bell,
+    BookOpen,
+    Code2,
+    FolderOpen,
+    LayoutDashboard,
+    Link2,
+    LogOut,
+    Menu,
+    MessageSquare,
+    Moon,
+    Settings,
+    Sparkles,
+    Sun,
+    TrendingUp,
+    Trophy,
+    UserCircle,
+    X,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import ThemeLogo from '../ThemeLogo';
 import { useTheme } from '../ThemeProvider';
 
 const NAV_ITEMS = [
@@ -59,13 +76,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     }}>
       {/* Logo */}
       <Link href="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none', marginBottom: '2rem' }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '10px',
-          background: 'linear-gradient(135deg, var(--accent), var(--accent))',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Code2 size={17} color="white" />
-        </div>
+        <ThemeLogo width={34} height={34} />
         <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: '1rem' }}>
           Admin<span style={{ color: 'var(--accent)' }}>CMS</span>
         </span>
