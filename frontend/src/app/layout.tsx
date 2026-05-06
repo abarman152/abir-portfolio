@@ -1,8 +1,7 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { JetBrains_Mono } from 'next/font/google';
-import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -33,12 +32,13 @@ async function getDefaultTheme(): Promise<'dark' | 'light'> {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.abirbarman.com'),
   title: 'Abir — Data Scientist',
   description: 'Data Scientist and ML Engineer building intelligent systems that turn data into real-world impact.',
   manifest: '/site.webmanifest',
   icons: {
-    // app/favicon.ico handles /favicon.ico automatically — only list PNG supplements here
     icon: [
+      { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
