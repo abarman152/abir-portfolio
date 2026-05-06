@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import { sendTestEmail } from '../lib/notifications';
 import prisma from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
-import { sendContactNotifications } from '../lib/notifications';
 
 const router = Router();
 
@@ -15,10 +15,6 @@ function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }
 
-function isValidPhone(v: string): boolean {
-  return /^\+?[1-9]\d{6,14}$/.test(v.trim().replace(/\s/g, ''));
-}
-
 router.get('/', authenticate, async (_, res) => {
   try {
     res.json(await getOrCreate());
@@ -30,24 +26,46 @@ router.get('/', authenticate, async (_, res) => {
 
 router.put('/', authenticate, async (req, res) => {
   try {
-    const { emailEnabled, emailRecipients, whatsappEnabled, whatsappNumbers } = req.body as {
+    const {
+      emailEnabled,
+      emailRecipients,
+      notificationEmail,
+      backupNotificationEmail,
+      resendEnabled,
+      resendFromEmail,
+      resendReplyTo,
+      autoReplyEnabled,
+    } = req.body as {
       emailEnabled?: boolean;
       emailRecipients?: string[];
-      whatsappEnabled?: boolean;
-      whatsappNumbers?: string[];
+      notificationEmail?: string;
+      backupNotificationEmail?: string;
+      resendEnabled?: boolean;
+      resendFromEmail?: string;
+      resendReplyTo?: string;
+      autoReplyEnabled?: boolean;
     };
 
     const data: Record<string, unknown> = {};
 
     if (emailEnabled !== undefined) data.emailEnabled = Boolean(emailEnabled);
+    if (resendEnabled !== undefined) data.resendEnabled = Boolean(resendEnabled);
+    if (autoReplyEnabled !== undefined) data.autoReplyEnabled = Boolean(autoReplyEnabled);
+
     if (Array.isArray(emailRecipients)) {
-      const valid = emailRecipients.map((e) => e.trim()).filter(isValidEmail);
-      data.emailRecipients = valid;
+      data.emailRecipients = emailRecipients.map((e) => e.trim()).filter(isValidEmail);
     }
-    if (whatsappEnabled !== undefined) data.whatsappEnabled = Boolean(whatsappEnabled);
-    if (Array.isArray(whatsappNumbers)) {
-      const valid = whatsappNumbers.map((n) => n.trim().replace(/\s/g, '')).filter(isValidPhone);
-      data.whatsappNumbers = valid;
+    if (notificationEmail !== undefined) {
+      data.notificationEmail = notificationEmail && isValidEmail(notificationEmail) ? notificationEmail.trim() : null;
+    }
+    if (backupNotificationEmail !== undefined) {
+      data.backupNotificationEmail = backupNotificationEmail && isValidEmail(backupNotificationEmail) ? backupNotificationEmail.trim() : null;
+    }
+    if (resendFromEmail !== undefined) {
+      data.resendFromEmail = resendFromEmail?.trim() || null;
+    }
+    if (resendReplyTo !== undefined) {
+      data.resendReplyTo = resendReplyTo && isValidEmail(resendReplyTo) ? resendReplyTo.trim() : null;
     }
 
     const existing = await getOrCreate();
@@ -59,31 +77,13 @@ router.put('/', authenticate, async (req, res) => {
   }
 });
 
-router.post('/test', authenticate, async (req, res) => {
+router.post('/test', authenticate, async (_req, res) => {
   try {
-    const { channel } = req.body as { channel?: 'email' | 'whatsapp' | 'all' };
-    const settings = await getOrCreate();
-
-    if (channel === 'email' || channel === 'all') {
-      if (!settings.emailEnabled || settings.emailRecipients.length === 0) {
-        return res.status(400).json({ error: 'Email not enabled or no recipients configured' });
-      }
+    const result = await sendTestEmail();
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
     }
-    if (channel === 'whatsapp' || channel === 'all') {
-      if (!settings.whatsappEnabled || settings.whatsappNumbers.length === 0) {
-        return res.status(400).json({ error: 'WhatsApp not enabled or no numbers configured' });
-      }
-    }
-
-    await sendContactNotifications({
-      name: 'Admin Test',
-      email: 'test@abirbarman.dev',
-      subject: 'Test Notification',
-      message: 'This is a test notification sent from your portfolio admin panel. If you received this, notifications are working correctly.',
-      timestamp: new Date(),
-    });
-
-    res.json({ message: 'Test notification sent successfully' });
+    res.json({ message: result.message });
   } catch (err) {
     console.error('[notificationSettings] test error:', err);
     res.status(500).json({ error: 'Failed to send test notification' });

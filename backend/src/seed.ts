@@ -1,5 +1,5 @@
-import prisma from './lib/prisma';
 import bcrypt from 'bcryptjs';
+import prisma from './lib/prisma';
 
 function slugify(text: string): string {
   return text
@@ -404,7 +404,7 @@ async function main() {
   const notifExists = await prisma.notificationSettings.count();
   if (!notifExists) {
     await prisma.notificationSettings.create({ data: {} });
-    console.log('NotificationSettings record created (all channels disabled by default)');
+    console.log('NotificationSettings record created (email enabled by default)');
   }
 
   // About Section (Home page)

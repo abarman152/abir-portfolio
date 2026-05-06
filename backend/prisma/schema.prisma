@@ -152,13 +152,18 @@ model Stat {
 }
 
 model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String
-  message   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id                 String    @id @default(cuid())
+  name               String
+  email              String
+  subject            String
+  message            String
+  read               Boolean   @default(false)
+  emailSent          Boolean   @default(false)
+  emailSentAt        DateTime?
+  resendMessageId    String?
+  notificationStatus String?
+  adminNotified      Boolean   @default(false)
+  createdAt          DateTime  @default(now())
 }
 
 model SiteSettings {
@@ -228,12 +233,16 @@ model AboutSkillGroup {
 }
 
 model NotificationSettings {
-  id               String   @id @default(cuid())
-  emailEnabled     Boolean  @default(false)
-  emailRecipients  String[] @default([])
-  whatsappEnabled  Boolean  @default(false)
-  whatsappNumbers  String[] @default([])
-  updatedAt        DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  emailEnabled            Boolean  @default(true)
+  emailRecipients         String[] @default([])
+  notificationEmail       String?
+  backupNotificationEmail String?
+  resendEnabled           Boolean  @default(true)
+  resendFromEmail         String?
+  resendReplyTo           String?
+  autoReplyEnabled        Boolean  @default(false)
+  updatedAt               DateTime @updatedAt
 }
 
 model AboutSection {
