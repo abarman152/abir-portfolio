@@ -273,6 +273,11 @@ export interface ContactMessage {
   subject: string;
   message: string;
   read: boolean;
+  emailSent: boolean;
+  emailSentAt: string | null;
+  resendMessageId: string | null;
+  notificationStatus: string | null;
+  adminNotified: boolean;
   createdAt: string;
 }
 
@@ -280,7 +285,11 @@ export interface NotificationSettings {
   id: string;
   emailEnabled: boolean;
   emailRecipients: string[];
-  whatsappEnabled: boolean;
-  whatsappNumbers: string[];
+  notificationEmail: string | null;
+  backupNotificationEmail: string | null;
+  resendEnabled: boolean;
+  resendFromEmail: string | null;
+  resendReplyTo: string | null;
+  autoReplyEnabled: boolean;
   updatedAt: string;
 }

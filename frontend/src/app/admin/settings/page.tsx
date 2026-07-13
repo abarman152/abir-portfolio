@@ -5,7 +5,7 @@ import { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
 import type { HeroConfig, HeroContent, SiteSettings } from '@/lib/types';
 import { motion } from 'framer-motion';
-import { CheckCircle, Eye, EyeOff, Image, Link2, Lock, Palette, Save, Shield, Unlink } from 'lucide-react';
+import { CheckCircle, Eye, EyeOff, Image as ImageIcon, Link2, Lock, Palette, Save, Shield, Unlink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -106,6 +106,7 @@ export default function AdminSettings() {
     setError('');
     try {
       const { heroConfig: _drop, id: _id, ...settingsRest } = settings as Record<string, unknown>;
+      void _drop; void _id;
       await Promise.all([
         api.put('/settings', { ...settingsRest, heroConfig }, authHeader(token)),
         api.put('/hero', hero, authHeader(token)),
@@ -346,7 +347,7 @@ export default function AdminSettings() {
                   fontSize: '0.82rem', fontWeight: 600, color: 'var(--text)',
                   marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem',
                 }}>
-                  <Image size={14} style={{ color: 'var(--accent)' }} />
+                  <ImageIcon size={14} style={{ color: 'var(--accent)' }} />
                   Theme-Specific Images
                 </div>
 

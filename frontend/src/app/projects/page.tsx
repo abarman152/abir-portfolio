@@ -7,7 +7,7 @@ import { Search, X, ArrowRight, GitFork, ExternalLink, ChevronLeft, ChevronRight
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import type { Project, ProjectsResponse } from '@/lib/types';
+import type { Project } from '@/lib/types';
 
 const API   = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 const PER_PAGE = 9;

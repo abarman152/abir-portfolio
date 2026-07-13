@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Save, CheckCircle, Plus, Eye, EyeOff, Pencil, Trash2, Link2, Unlink, Image, Palette, X, GripVertical } from 'lucide-react';
+import { Save, CheckCircle, Plus, Eye, EyeOff, Pencil, Trash2, Link2, Unlink, Image as ImageIcon, Palette, X } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import Modal, { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
@@ -448,7 +448,7 @@ export default function AdminAbout() {
                       <img src={aboutConfig.profileImage} alt="Profile preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-3)' }}>
-                      <Image size={13} />
+                      <ImageIcon size={13} />
                       Profile image preview
                     </div>
                   </div>
@@ -627,7 +627,7 @@ export default function AdminAbout() {
                       </button>
                     </div>
                   ))}
-                  {paragraphs.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>No paragraphs. Click "Add" to create one.</p>}
+                  {paragraphs.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>No paragraphs. Click &ldquo;Add&rdquo; to create one.</p>}
                 </div>
               </div>
 
@@ -687,7 +687,7 @@ export default function AdminAbout() {
                       </div>
                     </div>
                   ))}
-                  {categories.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center', padding: '1.5rem' }}>No category cards. Click "Add Card" to create one.</p>}
+                  {categories.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', textAlign: 'center', padding: '1.5rem' }}>No category cards. Click &ldquo;Add Card&rdquo; to create one.</p>}
                 </div>
               </div>
 

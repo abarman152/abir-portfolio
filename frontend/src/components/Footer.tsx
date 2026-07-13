@@ -128,7 +128,7 @@ export default function Footer() {
               </Link>
             ))}
             {/* Contact stays as anchor to homepage section */}
-            <a
+            <Link
               href="/#contact"
               style={{
                 fontSize: '0.85rem', color: 'var(--text-2)', textDecoration: 'none',
@@ -138,7 +138,7 @@ export default function Footer() {
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-2)')}
             >
               Contact
-            </a>
+            </Link>
           </nav>
         </div>
 

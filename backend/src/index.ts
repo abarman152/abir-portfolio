@@ -20,6 +20,13 @@ import statsRoutes from './routes/stats';
 
 dotenv.config();
 
+for (const required of ['DATABASE_URL', 'JWT_SECRET']) {
+  if (!process.env[required]) {
+    console.error(`Missing required environment variable: ${required}`);
+    process.exit(1);
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -61,6 +68,12 @@ app.use('/api/notification-settings', notificationSettingsRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err.message.startsWith('CORS:')) return res.status(403).json({ error: 'Origin not allowed' });
+  console.error('[error]', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 
