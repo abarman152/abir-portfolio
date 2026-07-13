@@ -3,6 +3,7 @@
 import AdminShell from '@/components/admin/AdminShell';
 import { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
+import { isValidResumeUrl } from '@/lib/resume';
 import type { HeroConfig, HeroContent, SiteSettings } from '@/lib/types';
 import { motion } from 'framer-motion';
 import { CheckCircle, Eye, EyeOff, Image as ImageIcon, Link2, Lock, Palette, Save, Shield, Unlink } from 'lucide-react';
@@ -100,8 +101,14 @@ export default function AdminSettings() {
     });
   }, []);
 
+  const resumeUrlInvalid = !!hero.resumeUrl && !isValidResumeUrl(hero.resumeUrl);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (resumeUrlInvalid) {
+      setError('Resume URL must be a valid http(s) link');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -233,7 +240,25 @@ export default function AdminSettings() {
                   value={hero.bio || ''} onChange={(e) => setHero({ ...hero, bio: e.target.value })} />
               </FormField>
               <FormField label="Resume URL">
-                <input style={inputCss} value={hero.resumeUrl || ''} onChange={(e) => setHero({ ...hero, resumeUrl: e.target.value })} />
+                <input
+                  style={{ ...inputCss, ...(resumeUrlInvalid ? { borderColor: '#ef4444' } : {}) }}
+                  value={hero.resumeUrl || ''}
+                  onChange={(e) => setHero({ ...hero, resumeUrl: e.target.value.trim() })}
+                  placeholder="https://res.cloudinary.com/…/resume.pdf"
+                  aria-invalid={resumeUrlInvalid}
+                  aria-describedby="resume-url-hint"
+                />
+                <div id="resume-url-hint" style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>
+                  {resumeUrlInvalid ? (
+                    <span style={{ color: '#ef4444' }}>Must be a valid http(s) URL</span>
+                  ) : isValidResumeUrl(hero.resumeUrl) ? (
+                    <a href={hero.resumeUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                      Open resume ↗
+                    </a>
+                  ) : (
+                    <span style={{ color: 'var(--text-3)' }}>Used by the Hero button, navbar, and /resume page</span>
+                  )}
+                </div>
               </FormField>
               <FormField label="Avatar URL (legacy fallback)">
                 <input style={inputCss} value={hero.avatarUrl || ''} onChange={(e) => setHero({ ...hero, avatarUrl: e.target.value })} />

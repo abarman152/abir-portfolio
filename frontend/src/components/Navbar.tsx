@@ -170,14 +170,16 @@ export default function Navbar() {
           </button>
 
           {/* Resume */}
-          <a
-            href="#"
+          <Link
+            href="/resume"
             className="hidden md:flex"
+            aria-label="View resume"
+            aria-current={pathname === '/resume' ? 'page' : undefined}
             style={{
               padding: '0.35rem 0.875rem', borderRadius: '7px',
-              border: '1px solid var(--border)',
-              fontSize: '0.825rem', fontWeight: 500,
-              color: 'var(--text-2)', textDecoration: 'none',
+              border: `1px solid ${pathname === '/resume' ? 'var(--border-2)' : 'var(--border)'}`,
+              fontSize: '0.825rem', fontWeight: pathname === '/resume' ? 600 : 500,
+              color: pathname === '/resume' ? 'var(--text)' : 'var(--text-2)', textDecoration: 'none',
               transition: 'border-color 0.15s, color 0.15s',
               display: 'inline-flex', alignItems: 'center',
             }}
@@ -186,12 +188,13 @@ export default function Navbar() {
               (e.currentTarget as HTMLElement).style.color = 'var(--text)';
             }}
             onMouseLeave={(e) => {
+              if (pathname === '/resume') return;
               (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
               (e.currentTarget as HTMLElement).style.color = 'var(--text-2)';
             }}
           >
             Resume
-          </a>
+          </Link>
 
           {/* Hire Me */}
           <a
@@ -342,8 +345,10 @@ export default function Navbar() {
                 display: 'flex', flexDirection: 'column', gap: '0.625rem',
                 flexShrink: 0,
               }}>
-                <a
-                  href="#"
+                <Link
+                  href="/resume"
+                  onClick={() => setMobileOpen(false)}
+                  aria-label="View resume"
                   style={{
                     display: 'block', textAlign: 'center',
                     padding: '0.7rem',
@@ -358,7 +363,7 @@ export default function Navbar() {
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-2)'; }}
                 >
                   Resume
-                </a>
+                </Link>
                 <a
                   href="#contact"
                   onClick={() => setMobileOpen(false)}

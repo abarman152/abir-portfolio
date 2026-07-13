@@ -14,6 +14,7 @@ One doc per product feature — purpose, user flow, architecture, edge cases, li
 | CMS content management | [`cms-content-management.md`](./cms-content-management.md) — see also [`../cms/admin-panel-reference.md`](../cms/admin-panel-reference.md) and [`../architecture/cms-flow.md`](../architecture/cms-flow.md) |
 | Dashboard analytics | [`dashboard-analytics.md`](./dashboard-analytics.md) |
 | Markdown content rendering | [`markdown-content-rendering.md`](./markdown-content-rendering.md) |
+| Resume system (centralized download) | [`resume-system.md`](./resume-system.md) — see also [`../architecture/resume-architecture.md`](../architecture/resume-architecture.md) |
 
 ## Related
 - [`../architecture/cms-flow.md`](../architecture/cms-flow.md)

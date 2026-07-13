@@ -8,6 +8,7 @@ One doc per route: purpose, SEO/metadata, data sources, loading/error states, an
 |---|---|
 | `/` | [`home.md`](./home.md) |
 | `/about` | [`about.md`](./about.md) |
+| `/resume` | [`resume-page.md`](./resume-page.md) |
 | `/projects` | [`projects.md`](./projects.md) |
 | `/projects/[slug]` | [`projects-detail.md`](./projects-detail.md) |
 | `/research` | [`research.md`](./research.md) |

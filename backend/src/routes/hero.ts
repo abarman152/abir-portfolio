@@ -21,9 +21,22 @@ router.get('/', async (_, res) => {
   res.json(hero);
 });
 
+const isHttpUrl = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
 router.put('/', authenticate, async (req, res) => {
   try {
     const { id: _id, updatedAt: _ts, ...data } = req.body;
+    if (data.resumeUrl !== undefined && data.resumeUrl !== '' && !isHttpUrl(data.resumeUrl)) {
+      return res.status(400).json({ error: 'resumeUrl must be a valid http(s) URL' });
+    }
     const existing = await prisma.heroContent.findFirst();
     if (existing) {
       const updated = await prisma.heroContent.update({ where: { id: existing.id }, data });

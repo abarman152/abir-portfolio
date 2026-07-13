@@ -6,6 +6,7 @@ export interface HeroContent {
   bio: string;
   resumeUrl: string;
   avatarUrl: string;
+  updatedAt?: string;
 }
 
 export interface HeroBadge {
