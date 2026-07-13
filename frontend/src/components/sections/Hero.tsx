@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Download, MapPin, Brain, FolderOpen, BookOpen, Star, Trophy, Zap, Award, GraduationCap, Code2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { isValidResumeUrl, resumeDownloadUrl } from '@/lib/resume';
 import type { HeroContent, SocialLink, HeroBadge, HeroConfig } from '@/lib/types';
 
 /* ─── Brand SVG icons ─────────────────────────────────────────── */
@@ -275,11 +276,13 @@ export default function Hero({ hero, socials, badges, heroConfig }: Props) {
                 View Projects <ArrowRight size={15} />
               </a>
 
-              {hero.resumeUrl ? (
+              {isValidResumeUrl(hero.resumeUrl) ? (
                 <a
-                  href={hero.resumeUrl}
+                  href={resumeDownloadUrl(hero.resumeUrl)}
+                  download
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Download resume"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                     padding: '0.7rem 1.5rem',

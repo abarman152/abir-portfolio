@@ -11,6 +11,7 @@ Start with [`overview.md`](./overview.md) for the high-level picture, then go to
 | [`rendering-strategy.md`](./rendering-strategy.md) | SSR/revalidation, homepage double-fetch |
 | [`state-management.md`](./state-management.md) | Why no Redux/Zustand; what state exists |
 | [`theme-architecture.md`](./theme-architecture.md) | Dark/light resolution, FOUC prevention |
+| [`resume-architecture.md`](./resume-architecture.md) | Centralized resume URL: single source of truth, caching, validation layers |
 | [`animation-architecture.md`](./animation-architecture.md) | Framer Motion conventions |
 | [`authentication-flow.md`](./authentication-flow.md) | Login, JWT verification, route guard location |
 | [`cms-flow.md`](./cms-flow.md) | Content authoring → API → DB → public site |

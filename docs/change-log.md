@@ -1,7 +1,31 @@
 # Audit Change Log
 
-**Version:** 1.0 · **Date:** 2026-07-06 · Branch: `antygravity-migration` (uncommitted working tree)
-Repository-level release history lives in [/CHANGELOG.md](../CHANGELOG.md); this file logs changes made by the production-readiness audit session.
+**Version:** 1.1 · **Date:** 2026-07-13 · Branch: `antygravity-migration`
+Repository-level release history lives in [/CHANGELOG.md](../CHANGELOG.md); this file logs changes made by agent sessions.
+
+## 2026-07-13 — Centralized Resume System
+
+### Frontend
+- `src/lib/resume.ts` — **new** shared resume module: `isValidResumeUrl`, `resumeDownloadUrl` (Cloudinary `fl_attachment`), `isEmbeddableResume`, cached `useResume()` hook with in-flight deduplication.
+- `src/app/resume/page.tsx`, `src/app/resume/ResumeClient.tsx` — **new** `/resume` page (metadata export; loading / error+retry / missing / populated states; PDF preview iframe; Download + Open-in-tab actions; last-updated metadata; responsive `.resume-grid`).
+- `src/components/Navbar.tsx` — dead `href="#"` Resume anchors (desktop + mobile drawer) → `<Link href="/resume">` with `aria-label`, active state (`aria-current="page"`), drawer auto-close.
+- `src/components/sections/Hero.tsx` — Resume CTA gated by `isValidResumeUrl`, href through `resumeDownloadUrl` + `download` attribute; `aria-label` added.
+- `src/app/admin/settings/page.tsx` — Resume URL field: inline validation (blocks save), placeholder, "Open resume ↗" preview link, `aria-invalid`/`aria-describedby`.
+- `src/lib/types.ts` — `HeroContent.updatedAt?` added (already in Prisma schema).
+- `src/app/sitemap.ts` — `/resume` static route added.
+
+### Backend
+- `src/routes/hero.ts` — `PUT /api/hero` rejects non-empty, non-http(s) `resumeUrl` with 400.
+
+### Documentation
+`docs/features/resume-system.md`, `docs/pages/resume-page.md`, `docs/components/resume-button.md`, `docs/architecture/resume-architecture.md`, `docs/development/resume-flow.md` — **new**.
+
+### Verified
+`tsc --noEmit` (frontend + backend) clean; `next build` passes with `/resume` in route table; lint at pre-existing baseline (no new issues); runtime-verified in browser: all four page states, navbar navigation + active state, mobile drawer link, single deduplicated `/api/hero` request per load, retry recovery, mobile 375px layout.
+
+---
+
+## 2026-07-06 — Production-readiness audit
 
 ## Source changes
 
