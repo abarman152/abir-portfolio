@@ -5,6 +5,7 @@ export interface HeroContent {
   roles: string[];
   bio: string;
   resumeUrl: string;
+  resumePreviewUrl: string;
   avatarUrl: string;
   updatedAt?: string;
 }

@@ -9,7 +9,8 @@ There is no single `<ResumeButton>` component — resume actions are lightweight
 |---|---|
 | `isValidResumeUrl(url)` | Type-guard: non-empty + parses as http(s). Gates rendering of download links |
 | `resumeDownloadUrl(url)` | Injects Cloudinary `fl_attachment` so the file downloads instead of rendering inline; passthrough for other hosts |
-| `isEmbeddableResume(url)` | Whether the `/resume` preview iframe should be attempted |
+| `isLikelyEmbeddablePreview(url)` | Whether a preview URL is a known-good iframe source (Drive `/preview`, Cloudinary, `.pdf`) |
+| `previewUrlHint(url)` | Admin-facing guidance for preview URLs unlikely to embed |
 | `useResume()` | Cached client hook returning `{ hero, loading, error, retry }` from `GET /api/hero` |
 
 ## Instances

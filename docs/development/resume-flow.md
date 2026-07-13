@@ -12,7 +12,9 @@ Admin edits Resume URL (/admin/settings)
           ↓ (no cache invalidation needed)
   Next visitor request:
     • Home page: server fetch /hero (no-store) → Hero props → Hero button
-    • /resume: useResume() client fetch /hero (no-store) → preview + actions
+    • /resume: useResume() client fetch /hero (no-store) → actions (resumeUrl)
+      + preview iframe (resumePreviewUrl — independent field, see
+        docs/features/resume-preview.md)
     • Navbar: static <Link href="/resume"> — never fetches
 ```
 

@@ -3,7 +3,7 @@
 import AdminShell from '@/components/admin/AdminShell';
 import { FormField, inputCss } from '@/components/admin/Modal';
 import { api, authHeader } from '@/lib/api';
-import { isValidResumeUrl } from '@/lib/resume';
+import { isValidResumeUrl, previewUrlHint } from '@/lib/resume';
 import type { HeroConfig, HeroContent, SiteSettings } from '@/lib/types';
 import { motion } from 'framer-motion';
 import { CheckCircle, Eye, EyeOff, Image as ImageIcon, Link2, Lock, Palette, Save, Shield, Unlink } from 'lucide-react';
@@ -102,11 +102,17 @@ export default function AdminSettings() {
   }, []);
 
   const resumeUrlInvalid = !!hero.resumeUrl && !isValidResumeUrl(hero.resumeUrl);
+  const previewUrlInvalid = !!hero.resumePreviewUrl && !isValidResumeUrl(hero.resumePreviewUrl);
+  const previewHint = hero.resumePreviewUrl ? previewUrlHint(hero.resumePreviewUrl) : null;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (resumeUrlInvalid) {
       setError('Resume URL must be a valid http(s) link');
+      return;
+    }
+    if (previewUrlInvalid) {
+      setError('Resume Preview URL must be a valid http(s) link');
       return;
     }
     setSaving(true);
@@ -256,7 +262,30 @@ export default function AdminSettings() {
                       Open resume ↗
                     </a>
                   ) : (
-                    <span style={{ color: 'var(--text-3)' }}>Used by the Hero button, navbar, and /resume page</span>
+                    <span style={{ color: 'var(--text-3)' }}>Used by the Download / Open buttons on the Hero and /resume page</span>
+                  )}
+                </div>
+              </FormField>
+              <FormField label="Resume Preview URL">
+                <input
+                  style={{ ...inputCss, ...(previewUrlInvalid ? { borderColor: '#ef4444' } : {}) }}
+                  value={hero.resumePreviewUrl || ''}
+                  onChange={(e) => setHero({ ...hero, resumePreviewUrl: e.target.value.trim() })}
+                  placeholder="https://drive.google.com/file/d/…/preview"
+                  aria-invalid={previewUrlInvalid}
+                  aria-describedby="resume-preview-url-hint"
+                />
+                <div id="resume-preview-url-hint" style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>
+                  {previewUrlInvalid ? (
+                    <span style={{ color: '#ef4444' }}>Must be a valid http(s) URL</span>
+                  ) : previewHint ? (
+                    <span style={{ color: '#f59e0b' }}>{previewHint}</span>
+                  ) : isValidResumeUrl(hero.resumePreviewUrl) ? (
+                    <a href={hero.resumePreviewUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                      Open preview ↗
+                    </a>
+                  ) : (
+                    <span style={{ color: 'var(--text-3)' }}>Embedded preview on the /resume page — independent from the download URL</span>
                   )}
                 </div>
               </FormField>

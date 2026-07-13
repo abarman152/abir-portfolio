@@ -3,10 +3,11 @@
 import { motion } from 'framer-motion';
 import { Calendar, Download, ExternalLink, FileText, Mail, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import { fmtFullDate } from '@/lib/date';
-import { isEmbeddableResume, isValidResumeUrl, resumeDownloadUrl, useResume } from '@/lib/resume';
+import { isValidResumeUrl, resumeDownloadUrl, useResume } from '@/lib/resume';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -96,6 +97,84 @@ function StatusCard({ icon, title, message, children }: {
   );
 }
 
+function PreviewFallback({ message }: { message: string }) {
+  return (
+    <div
+      role="status"
+      style={{
+        height: 'min(40vh, 420px)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: '0.75rem', padding: '2rem', textAlign: 'center',
+      }}
+    >
+      <FileText size={28} style={{ color: 'var(--text-3)' }} aria-hidden="true" />
+      <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', lineHeight: 1.7, maxWidth: '320px' }}>
+        {message}
+      </p>
+    </div>
+  );
+}
+
+const PREVIEW_TIMEOUT_MS = 15000;
+
+function ResumePreview({ previewUrl }: { previewUrl: string }) {
+  const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
+
+  useEffect(() => {
+    if (status !== 'loading') return;
+    const timer = setTimeout(
+      () => setStatus((s) => (s === 'loading' ? 'failed' : s)),
+      PREVIEW_TIMEOUT_MS
+    );
+    return () => clearTimeout(timer);
+  }, [status]);
+
+  // The iframe fires `load` even for network-error pages, so a blank panel
+  // would otherwise read as "ready". An opaque no-cors probe rejects only on
+  // genuine network failures (DNS, refused connection), catching that case.
+  useEffect(() => {
+    if (!isValidResumeUrl(previewUrl)) return;
+    let active = true;
+    fetch(previewUrl, { method: 'HEAD', mode: 'no-cors' }).catch(() => {
+      if (active) setStatus('failed');
+    });
+    return () => {
+      active = false;
+    };
+  }, [previewUrl]);
+
+  if (!isValidResumeUrl(previewUrl)) {
+    return <PreviewFallback message="No inline preview has been set up yet. Use the buttons to open or download the resume." />;
+  }
+  if (status === 'failed') {
+    return <PreviewFallback message="The preview couldn't be loaded. Use the buttons to open or download the resume." />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {status === 'loading' && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            background: 'var(--bg-3)',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}
+        />
+      )}
+      <iframe
+        src={previewUrl}
+        title="Resume preview"
+        loading="lazy"
+        allow="autoplay"
+        onLoad={() => setStatus('ready')}
+        onError={() => setStatus('failed')}
+        style={{ width: '100%', height: 'min(65vh, 720px)', border: 'none', display: 'block', background: 'var(--bg-3)' }}
+      />
+    </div>
+  );
+}
+
 export default function ResumeClient() {
   const { hero, loading, error, retry } = useResume();
 
@@ -145,25 +224,7 @@ export default function ResumeClient() {
                 className="card"
                 style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
               >
-                {isEmbeddableResume(resumeUrl) ? (
-                  <iframe
-                    src={resumeUrl}
-                    title="Resume preview"
-                    loading="lazy"
-                    style={{ width: '100%', height: 'min(65vh, 720px)', border: 'none', display: 'block', background: 'var(--bg-3)' }}
-                  />
-                ) : (
-                  <div style={{
-                    height: 'min(40vh, 420px)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    gap: '0.75rem', padding: '2rem', textAlign: 'center',
-                  }}>
-                    <FileText size={28} style={{ color: 'var(--text-3)' }} aria-hidden="true" />
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', lineHeight: 1.7, maxWidth: '320px' }}>
-                      Inline preview isn&apos;t available for this file. Use the buttons to open or download it.
-                    </p>
-                  </div>
-                )}
+                <ResumePreview previewUrl={hero?.resumePreviewUrl ?? ''} />
               </motion.div>
 
               {/* ── Actions & metadata ── */}

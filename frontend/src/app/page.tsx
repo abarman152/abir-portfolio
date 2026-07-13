@@ -39,6 +39,7 @@ const DEFAULT_HERO: HeroContent = {
   roles: ['Data Scientist', 'ML Engineer', 'Researcher'],
   bio: 'Specializing in machine learning, data pipelines, and applied AI research. I turn messy data into decisions and prototypes into production systems.',
   resumeUrl: '',
+  resumePreviewUrl: '',
   avatarUrl: '',
 };
 

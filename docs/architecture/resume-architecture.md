@@ -5,7 +5,7 @@
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  PostgreSQL (Supabase)                                     │
-│  HeroContent.resumeUrl  ·  HeroContent.updatedAt           │
+│  HeroContent.resumeUrl · resumePreviewUrl · updatedAt      │
 └──────────────────────────┬─────────────────────────────────┘
                            │ Prisma
 ┌──────────────────────────▼─────────────────────────────────┐
@@ -30,7 +30,7 @@
 ```
 
 ## Module boundaries
-- **`frontend/src/lib/resume.ts`** is the only place that knows *how* to validate, transform, and fetch the resume URL. Pure helpers (`isValidResumeUrl`, `resumeDownloadUrl`, `isEmbeddableResume`) plus one hook (`useResume`).
+- **`frontend/src/lib/resume.ts`** is the only place that knows *how* to validate, transform, and fetch resume URLs. Pure helpers (`isValidResumeUrl`, `resumeDownloadUrl`, `isLikelyEmbeddablePreview`, `previewUrlHint`) plus one hook (`useResume`).
 - **No Resume Context** — deliberately. The navbar doesn't need data (it navigates), the Hero gets props from the home page's existing server fetch, and only `/resume` fetches client-side. A context/provider would add an app-wide subscription for a single consumer.
 - **No new API endpoint** — `HeroContent` already carried `resumeUrl`; reusing `GET /api/hero` keeps admin, hero, and resume page trivially consistent.
 
