@@ -9,7 +9,7 @@ Recruiters reach the resume from wherever they land — top navigation, hero, or
 ## User Flow
 1. The site owner sets **Resume URL** in `/admin/settings` → Hero Content (validated client- and server-side as an http(s) URL).
 2. A visitor clicks **Resume** in the navbar (desktop button or mobile drawer) → navigates to `/resume`.
-3. `/resume` fetches the hero record client-side, shows the resume preview (PDF iframe when embeddable), last-updated date, a primary **Download Resume** button, and an **Open in New Tab** button.
+3. `/resume` fetches the hero record client-side, shows the resume preview (embedded viewer driven by the separate **Resume Preview URL** — see [`resume-preview.md`](./resume-preview.md)), last-updated date, a primary **Download Resume** button, and an **Open in New Tab** button.
 4. Alternatively, the visitor clicks **Resume** in the Hero section → direct download of the same file (Cloudinary `fl_attachment` variant when applicable).
 5. If no resume URL is set, `/resume` shows a friendly empty state with a contact CTA, and the Hero swaps its Resume button for a Contact button.
 

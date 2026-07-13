@@ -16,7 +16,7 @@ Dedicated page where visitors can preview, open, and download the resume. Linked
 Standard public-page shell (`Navbar` → `main` → `Footer`) with the same header pattern as `/certifications`:
 1. **Header band** (`--bg-2`): eyebrow "Portfolio · Resume", h1, subtitle built from the hero name and roles.
 2. **Content grid** (`.resume-grid`, 1.6fr/1fr, single column below 768px):
-   - **Preview card** — `<iframe title="Resume preview">` for embeddable files (PDF/Cloudinary), otherwise a fallback note with a file icon.
+   - **Preview card** — `ResumePreview` component driven by the dedicated `HeroContent.resumePreviewUrl` (independent from the download URL — see [`../features/resume-preview.md`](../features/resume-preview.md)): iframe with loading skeleton, reachability probe + 15 s timeout for failure, fallback note when missing/invalid.
    - **Actions card** — primary **Download Resume** (accent, `fl_attachment` URL for Cloudinary) and outline **Open in New Tab**.
    - **Metadata card** — "Last updated {date}" from `HeroContent.updatedAt` via `fmtFullDate`.
 

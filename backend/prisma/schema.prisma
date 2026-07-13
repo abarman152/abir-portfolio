@@ -18,9 +18,10 @@ model HeroContent {
   name      String   @default("Abir Barman")
   tagline   String   @default("Data Scientist & Full Stack Developer")
   roles     String[] @default(["Data Scientist", "ML Engineer", "Full Stack Developer", "Researcher"])
-  bio       String   @default("")
-  resumeUrl String   @default("")
-  avatarUrl String   @default("")
+  bio              String   @default("")
+  resumeUrl        String   @default("")
+  resumePreviewUrl String   @default("")
+  avatarUrl        String   @default("")
   updatedAt DateTime @updatedAt
 }
 

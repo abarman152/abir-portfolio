@@ -24,11 +24,30 @@ export function resumeDownloadUrl(url: string): string {
   return cloudinary ? `${cloudinary[1]}fl_attachment/${cloudinary[2]}` : url;
 }
 
-export function isEmbeddableResume(url: string): boolean {
+// Known-good iframe sources: Google Drive /preview links, Google Docs viewer,
+// Cloudinary-hosted files, and direct PDFs. Anything else may still work but
+// can be blocked by the host's X-Frame-Options/CSP.
+export function isLikelyEmbeddablePreview(url: string): boolean {
   return (
-    /\.pdf(?:[?#]|$)/i.test(url) ||
-    /^https:\/\/res\.cloudinary\.com\/[^/]+\/(?:image|raw)\/upload\//.test(url)
+    /^https:\/\/drive\.google\.com\/file\/d\/[^/]+\/preview(?:[?#]|$)/.test(url) ||
+    /^https:\/\/docs\.google\.com\//.test(url) ||
+    /^https:\/\/res\.cloudinary\.com\/[^/]+\/(?:image|raw)\/upload\//.test(url) ||
+    /\.pdf(?:[?#]|$)/i.test(url)
   );
+}
+
+// Admin-facing guidance for preview URLs that are valid http(s) but unlikely
+// to render inside an iframe. Returns null when the URL looks fine.
+export function previewUrlHint(url: string): string | null {
+  if (!isValidResumeUrl(url)) return null;
+  const driveShare = url.match(/^https:\/\/drive\.google\.com\/file\/d\/([^/]+)\/(?:view|edit)/);
+  if (driveShare) {
+    return `Use the /preview form of this Google Drive link: https://drive.google.com/file/d/${driveShare[1]}/preview`;
+  }
+  if (!isLikelyEmbeddablePreview(url)) {
+    return 'This URL may not render in an embedded preview — Google Drive /preview links or direct PDF URLs work best';
+  }
+  return null;
 }
 
 interface ResumeState {

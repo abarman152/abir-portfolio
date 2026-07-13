@@ -37,6 +37,9 @@ router.put('/', authenticate, async (req, res) => {
     if (data.resumeUrl !== undefined && data.resumeUrl !== '' && !isHttpUrl(data.resumeUrl)) {
       return res.status(400).json({ error: 'resumeUrl must be a valid http(s) URL' });
     }
+    if (data.resumePreviewUrl !== undefined && data.resumePreviewUrl !== '' && !isHttpUrl(data.resumePreviewUrl)) {
+      return res.status(400).json({ error: 'resumePreviewUrl must be a valid http(s) URL' });
+    }
     const existing = await prisma.heroContent.findFirst();
     if (existing) {
       const updated = await prisma.heroContent.update({ where: { id: existing.id }, data });

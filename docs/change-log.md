@@ -3,6 +3,28 @@
 **Version:** 1.1 · **Date:** 2026-07-13 · Branch: `antygravity-migration`
 Repository-level release history lives in [/CHANGELOG.md](../CHANGELOG.md); this file logs changes made by agent sessions.
 
+## 2026-07-13 — Resume Preview URL (independent embed source)
+
+### Database
+- `HeroContent.resumePreviewUrl String @default("")` — additive column via `prisma db push` (local dev DB; deploy runs it against prod). Prisma CLI required Node 22 (`@prisma/dev` ESM crash on Node 20.16).
+
+### Backend
+- `src/routes/hero.ts` — `PUT /api/hero` validates `resumePreviewUrl` (400 if non-empty and not http(s)).
+
+### Frontend
+- `src/lib/resume.ts` — `isEmbeddableResume` → `isLikelyEmbeddablePreview` (Drive `/preview`, docs.google.com, Cloudinary, `.pdf`); new `previewUrlHint` for admin guidance (auto-suggests the `/preview` form of Drive `/view` links).
+- `src/app/resume/ResumeClient.tsx` — new `ResumePreview` component: iframe driven by `resumePreviewUrl` only (Download/Open keep `resumeUrl`); loading skeleton, `no-cors` HEAD reachability probe + 15 s timeout for failure, fallback notes for missing/invalid/failed.
+- `src/app/admin/settings/page.tsx` — "Resume Preview URL" field with red invalid error (blocks save), amber embeddability hints, "Open preview ↗" link.
+- `src/lib/types.ts`, `src/app/page.tsx` — `resumePreviewUrl` on `HeroContent` + default.
+
+### Documentation
+`docs/features/resume-preview.md` — **new**; preview references updated in `resume-system.md`, `resume-page.md`, `resume-button.md`, `resume-architecture.md`, `resume-flow.md`.
+
+### Verified
+tsc clean (FE+BE); build passes; lint at baseline; runtime-verified in browser: Google Drive `/preview` renders the real resume in the iframe, missing/invalid → fallback note, unreachable host → failure note via probe, Download/Open buttons keep using the download URL (no mixing), Hero button unchanged.
+
+---
+
 ## 2026-07-13 — Centralized Resume System
 
 ### Frontend

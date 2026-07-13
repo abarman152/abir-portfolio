@@ -15,6 +15,7 @@ One doc per product feature — purpose, user flow, architecture, edge cases, li
 | Dashboard analytics | [`dashboard-analytics.md`](./dashboard-analytics.md) |
 | Markdown content rendering | [`markdown-content-rendering.md`](./markdown-content-rendering.md) |
 | Resume system (centralized download) | [`resume-system.md`](./resume-system.md) — see also [`../architecture/resume-architecture.md`](../architecture/resume-architecture.md) |
+| Resume preview (embedded viewer) | [`resume-preview.md`](./resume-preview.md) |
 
 ## Related
 - [`../architecture/cms-flow.md`](../architecture/cms-flow.md)
