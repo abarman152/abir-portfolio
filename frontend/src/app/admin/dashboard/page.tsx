@@ -28,6 +28,7 @@ const CARDS = [
 export default function Dashboard() {
   const [counts, setCounts] = useState<Counts>({ projects: 0, papers: 0, certs: 0, achievements: 0, messages: 0, unread: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token') || '';
@@ -44,7 +45,10 @@ export default function Dashboard() {
           unread: data.unread ?? 0,
         });
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        setError('Failed to load dashboard counts. Check that the backend is running and you are logged in.');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -55,6 +59,16 @@ export default function Dashboard() {
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text)' }}>Dashboard</h1>
           <p style={{ color: 'var(--text-2)', marginTop: '0.25rem' }}>Overview of your portfolio content</p>
         </div>
+
+        {error && (
+          <div style={{
+            padding: '0.875rem 1.25rem', borderRadius: '12px', marginBottom: '1.5rem',
+            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
+            color: '#ef4444', fontSize: '0.875rem',
+          }}>
+            {error}
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
           {CARDS.map(({ key, label, icon: Icon, href, color }, i) => (

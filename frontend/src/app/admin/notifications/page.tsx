@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Plus, Trash2, Mail, Phone, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import { api, authHeader } from '@/lib/api';
 import type { NotificationSettings } from '@/lib/types';
+import { AlertCircle, CheckCircle, Loader2, Mail, Plus, Reply, Send, Settings, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 function getToken() {
   return typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '';
@@ -34,6 +34,11 @@ const tagStyle: React.CSSProperties = {
   padding: '0.3rem 0.7rem', borderRadius: '6px',
   background: 'var(--bg-3)', border: '1px solid var(--border)',
   fontSize: '0.82rem', color: 'var(--text-2)',
+};
+
+const labelCss: React.CSSProperties = {
+  display: 'block', fontSize: '0.78rem', color: 'var(--text-2)',
+  fontWeight: 500, marginBottom: '0.35rem',
 };
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -85,10 +90,8 @@ export default function AdminNotifications() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [testingEmail, setTestingEmail] = useState(false);
-  const [testingWA, setTestingWA] = useState(false);
 
   const [emailInput, setEmailInput] = useState('');
-  const [phoneInput, setPhoneInput] = useState('');
 
   const showToast = (type: 'success' | 'error', msg: string) => {
     setToast({ type, msg });
@@ -145,35 +148,16 @@ export default function AdminNotifications() {
     await save({ emailRecipients: settings?.emailRecipients.filter((e) => e !== email) ?? [] });
   };
 
-  const addPhone = async () => {
-    const v = phoneInput.trim().replace(/\s/g, '');
-    if (!v || !/^\+?[1-9]\d{6,14}$/.test(v)) {
-      showToast('error', 'Enter a valid phone number with country code (e.g. +919876543210)');
-      return;
-    }
-    if (settings?.whatsappNumbers.includes(v)) {
-      showToast('error', 'Number already added');
-      return;
-    }
-    setPhoneInput('');
-    await save({ whatsappNumbers: [...(settings?.whatsappNumbers ?? []), v] });
-  };
-
-  const removePhone = async (num: string) => {
-    await save({ whatsappNumbers: settings?.whatsappNumbers.filter((n) => n !== num) ?? [] });
-  };
-
-  const sendTest = async (channel: 'email' | 'whatsapp') => {
-    const setTesting = channel === 'email' ? setTestingEmail : setTestingWA;
-    setTesting(true);
+  const sendTest = async () => {
+    setTestingEmail(true);
     try {
-      await api.post('/notification-settings/test', { channel }, authHeader(getToken()));
-      showToast('success', `Test ${channel === 'email' ? 'email' : 'WhatsApp'} sent successfully`);
+      await api.post('/notification-settings/test', {}, authHeader(getToken()));
+      showToast('success', 'Test email sent successfully');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to send test';
+      const msg = err instanceof Error ? err.message : 'Failed to send test email';
       showToast('error', msg);
     } finally {
-      setTesting(false);
+      setTestingEmail(false);
     }
   };
 
@@ -196,7 +180,7 @@ export default function AdminNotifications() {
             Contact Notifications
           </h1>
           <p style={{ fontSize: '0.825rem', color: 'var(--text-3)', marginTop: '0.25rem' }}>
-            Forward new contact messages to email and WhatsApp. All settings are admin-controlled.
+            Configure email notifications for contact form submissions. Powered by Resend.
           </p>
         </div>
 
@@ -206,7 +190,7 @@ export default function AdminNotifications() {
           </div>
         )}
 
-        {/* ── EMAIL ── */}
+        {/* ── EMAIL NOTIFICATIONS ── */}
         <div style={card}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -224,28 +208,57 @@ export default function AdminNotifications() {
             />
           </div>
 
-          {/* recipient tags */}
+          {/* Primary notification email */}
+          <div style={{ marginBottom: '0.875rem' }}>
+            <label style={labelCss}>Primary Notification Email</label>
+            <input
+              type="email"
+              placeholder="admin@yourdomain.com"
+              value={settings?.notificationEmail ?? ''}
+              onChange={(e) => setSettings(settings ? { ...settings, notificationEmail: e.target.value || null } : null)}
+              onBlur={() => save({ notificationEmail: settings?.notificationEmail })}
+              style={inputCss}
+            />
+          </div>
+
+          {/* Backup notification email */}
+          <div style={{ marginBottom: '0.875rem' }}>
+            <label style={labelCss}>Backup Notification Email</label>
+            <input
+              type="email"
+              placeholder="backup@yourdomain.com (optional)"
+              value={settings?.backupNotificationEmail ?? ''}
+              onChange={(e) => setSettings(settings ? { ...settings, backupNotificationEmail: e.target.value || null } : null)}
+              onBlur={() => save({ backupNotificationEmail: settings?.backupNotificationEmail })}
+              style={inputCss}
+            />
+          </div>
+
+          {/* Additional recipient tags */}
           {(settings?.emailRecipients ?? []).length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.875rem' }}>
-              {settings!.emailRecipients.map((email) => (
-                <span key={email} style={tagStyle}>
-                  {email}
-                  <button
-                    onClick={() => removeEmail(email)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 0, display: 'flex' }}
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </span>
-              ))}
+            <div style={{ marginBottom: '0.875rem' }}>
+              <label style={labelCss}>Additional Recipients</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {settings!.emailRecipients.map((email) => (
+                  <span key={email} style={tagStyle}>
+                    {email}
+                    <button
+                      onClick={() => removeEmail(email)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 0, display: 'flex' }}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* add email */}
+          {/* add email recipient */}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <input
               type="email"
-              placeholder="Add email address…"
+              placeholder="Add additional recipient…"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addEmail()}
@@ -264,19 +277,13 @@ export default function AdminNotifications() {
             </button>
           </div>
 
-          {/* SMTP hint */}
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.75rem' }}>
-            Configure <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>SMTP_HOST</code>,{' '}
-            <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>SMTP_USER</code>, and{' '}
-            <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>SMTP_PASS</code> in your server environment variables.
-          </p>
-
-          {settings?.emailEnabled && settings.emailRecipients.length > 0 && (
+          {/* Test email */}
+          {settings?.emailEnabled && (
             <button
-              onClick={() => sendTest('email')}
+              onClick={sendTest}
               disabled={testingEmail}
               style={{
-                marginTop: '0.75rem', padding: '0.5rem 0.875rem', borderRadius: '8px',
+                marginTop: '0.875rem', padding: '0.5rem 0.875rem', borderRadius: '8px',
                 background: 'var(--bg-3)', border: '1px solid var(--border)',
                 cursor: testingEmail ? 'not-allowed' : 'pointer',
                 color: 'var(--text-2)', fontSize: '0.8rem', fontWeight: 600,
@@ -290,89 +297,72 @@ export default function AdminNotifications() {
           )}
         </div>
 
-        {/* ── WHATSAPP ── */}
+        {/* ── RESEND SETTINGS ── */}
         <div style={card}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Phone size={16} style={{ color: '#25d366' }} />
+              <Settings size={16} style={{ color: 'var(--accent)' }} />
               <div>
-                <p style={sectionTitle}>WhatsApp Notifications</p>
+                <p style={sectionTitle}>Resend Configuration</p>
                 <p style={{ ...sectionDesc, margin: 0 }}>
-                  Send a WhatsApp message via Twilio when a contact form message is received.
+                  Configure sender identity and email delivery settings.
                 </p>
               </div>
             </div>
             <Toggle
-              on={settings?.whatsappEnabled ?? false}
-              onChange={(v) => save({ whatsappEnabled: v })}
+              on={settings?.resendEnabled ?? true}
+              onChange={(v) => save({ resendEnabled: v })}
             />
           </div>
 
-          {/* number tags */}
-          {(settings?.whatsappNumbers ?? []).length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.875rem' }}>
-              {settings!.whatsappNumbers.map((num) => (
-                <span key={num} style={tagStyle}>
-                  {num}
-                  <button
-                    onClick={() => removePhone(num)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 0, display: 'flex' }}
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* add phone */}
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ marginBottom: '0.875rem' }}>
+            <label style={labelCss}>From Email</label>
             <input
-              type="tel"
-              placeholder="Add phone with country code (e.g. +919876543210)…"
-              value={phoneInput}
-              onChange={(e) => setPhoneInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addPhone()}
-              style={{ ...inputCss, flex: 1 }}
+              type="text"
+              placeholder="Abir Barman Portfolio <noreply@yourdomain.com>"
+              value={settings?.resendFromEmail ?? ''}
+              onChange={(e) => setSettings(settings ? { ...settings, resendFromEmail: e.target.value || null } : null)}
+              onBlur={() => save({ resendFromEmail: settings?.resendFromEmail })}
+              style={inputCss}
             />
-            <button
-              onClick={addPhone}
-              style={{
-                padding: '0.6rem 0.875rem', borderRadius: '8px',
-                background: '#25d366', border: 'none', cursor: 'pointer',
-                color: 'white', display: 'flex', alignItems: 'center', gap: '0.35rem',
-                fontSize: '0.8rem', fontWeight: 600, flexShrink: 0,
-              }}
-            >
-              <Plus size={14} /> Add
-            </button>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.35rem' }}>
+              Must be a verified domain in Resend, or use the default <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>onboarding@resend.dev</code>.
+            </p>
           </div>
 
-          {/* Twilio hint */}
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '0.75rem' }}>
-            Requires{' '}
-            <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>TWILIO_ACCOUNT_SID</code>,{' '}
-            <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>TWILIO_AUTH_TOKEN</code>, and{' '}
-            <code style={{ background: 'var(--bg-3)', padding: '1px 5px', borderRadius: '4px' }}>TWILIO_WHATSAPP_FROM</code> in your server environment variables.
-          </p>
+          <div style={{ marginBottom: '0.875rem' }}>
+            <label style={labelCss}>Reply-To Email</label>
+            <input
+              type="email"
+              placeholder="your@email.com (optional)"
+              value={settings?.resendReplyTo ?? ''}
+              onChange={(e) => setSettings(settings ? { ...settings, resendReplyTo: e.target.value || null } : null)}
+              onBlur={() => save({ resendReplyTo: settings?.resendReplyTo })}
+              style={inputCss}
+            />
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.35rem' }}>
+              Defaults to the contact form sender&apos;s email if not set.
+            </p>
+          </div>
+        </div>
 
-          {settings?.whatsappEnabled && settings.whatsappNumbers.length > 0 && (
-            <button
-              onClick={() => sendTest('whatsapp')}
-              disabled={testingWA}
-              style={{
-                marginTop: '0.75rem', padding: '0.5rem 0.875rem', borderRadius: '8px',
-                background: 'var(--bg-3)', border: '1px solid var(--border)',
-                cursor: testingWA ? 'not-allowed' : 'pointer',
-                color: 'var(--text-2)', fontSize: '0.8rem', fontWeight: 600,
-                display: 'flex', alignItems: 'center', gap: '0.4rem',
-                opacity: testingWA ? 0.6 : 1,
-              }}
-            >
-              {testingWA ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={13} />}
-              {testingWA ? 'Sending…' : 'Send Test WhatsApp'}
-            </button>
-          )}
+        {/* ── AUTO-REPLY ── */}
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Reply size={16} style={{ color: 'var(--accent)' }} />
+              <div>
+                <p style={sectionTitle}>Auto-Reply</p>
+                <p style={{ ...sectionDesc, margin: 0 }}>
+                  Automatically send a thank-you email to visitors after they submit the contact form.
+                </p>
+              </div>
+            </div>
+            <Toggle
+              on={settings?.autoReplyEnabled ?? false}
+              onChange={(v) => save({ autoReplyEnabled: v })}
+            />
+          </div>
         </div>
 
         {/* ── ENV VAR GUIDE ── */}
@@ -384,24 +374,18 @@ export default function AdminNotifications() {
           <p style={{ ...sectionTitle, marginBottom: '0.75rem' }}>Environment Variables Required</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {[
-              { key: 'SMTP_HOST', example: 'smtp.gmail.com', group: 'Email' },
-              { key: 'SMTP_PORT', example: '587', group: 'Email' },
-              { key: 'SMTP_USER', example: 'you@gmail.com', group: 'Email' },
-              { key: 'SMTP_PASS', example: 'your-app-password', group: 'Email' },
-              { key: 'SMTP_FROM', example: 'you@gmail.com (optional)', group: 'Email' },
-              { key: 'TWILIO_ACCOUNT_SID', example: 'ACxxxxxxxx', group: 'WhatsApp' },
-              { key: 'TWILIO_AUTH_TOKEN', example: 'your-auth-token', group: 'WhatsApp' },
-              { key: 'TWILIO_WHATSAPP_FROM', example: '+14155238886', group: 'WhatsApp' },
-            ].map(({ key, example, group }) => (
+              { key: 'RESEND_API_KEY', example: 're_xxxxxxxx', desc: 'API key from resend.com' },
+              { key: 'RESEND_FROM_EMAIL', example: 'Portfolio <noreply@yourdomain.com>', desc: 'Fallback sender' },
+            ].map(({ key, example, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
                 <span style={{
                   fontSize: '0.72rem', fontWeight: 600, padding: '1px 6px', borderRadius: '4px',
-                  background: group === 'Email' ? '#6366f115' : '#25d36615',
-                  color: group === 'Email' ? 'var(--accent)' : '#25d366',
+                  background: '#6366f115',
+                  color: 'var(--accent)',
                   flexShrink: 0,
-                }}>{group}</span>
+                }}>Resend</span>
                 <code style={{ fontSize: '0.8rem', color: 'var(--text)', background: 'var(--bg-3)', padding: '1px 6px', borderRadius: '4px' }}>{key}</code>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{example}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{example} &mdash; {desc}</span>
               </div>
             ))}
           </div>

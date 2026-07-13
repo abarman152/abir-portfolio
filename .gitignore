@@ -56,3 +56,6 @@ public/uploads/
 .cache/
 *.pem
 *.txt
+
+# ─── Legacy assets (pre-rebrand backups, not part of the build) ──────────────
+Archive/

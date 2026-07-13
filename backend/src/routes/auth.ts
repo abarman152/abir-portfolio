@@ -1,12 +1,24 @@
 import bcrypt from 'bcryptjs';
-import { Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-router.post('/login', async (req, res) => {
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please try again in 15 minutes.' },
+  handler: (_req: Request, res: Response, _next: NextFunction, options: { message: unknown; statusCode: number }) => {
+    res.status(options.statusCode).json(options.message);
+  },
+});
+
+router.post('/login', authLimiter, async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
@@ -20,11 +32,17 @@ router.post('/login', async (req, res) => {
   res.json({ token, admin: { id: admin.id, email: admin.email } });
 });
 
-router.post('/setup', async (req, res) => {
+router.post('/setup', authLimiter, async (req, res) => {
   const count = await prisma.admin.count();
   if (count > 0) return res.status(403).json({ error: 'Admin already exists' });
 
   const { email, password } = req.body;
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ error: 'Valid email required' });
+  }
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
   const hashed = await bcrypt.hash(password, 12);
   const admin = await prisma.admin.create({ data: { email, password: hashed } });
   res.json({ message: 'Admin created', id: admin.id });

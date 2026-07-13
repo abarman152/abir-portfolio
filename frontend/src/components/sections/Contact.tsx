@@ -1,25 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, CheckCircle, AlertCircle, Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { api } from '@/lib/api';
+import { motion } from 'framer-motion';
+import { AlertCircle, CheckCircle, Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const submitting = useRef(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting.current || status === 'loading') return;
+    submitting.current = true;
     setStatus('loading');
+    setErrorMsg('');
     try {
       await api.post('/contact', form);
       setStatus('success');
       setForm({ name: '', email: '', subject: '', message: '' });
-    } catch {
+      resetTimer.current = setTimeout(() => setStatus('idle'), 4000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to send message. Please try again.';
+      setErrorMsg(msg);
       setStatus('error');
+      resetTimer.current = setTimeout(() => setStatus('idle'), 5000);
+    } finally {
+      submitting.current = false;
     }
-    setTimeout(() => setStatus('idle'), 4000);
   };
 
   const inputStyle = {
@@ -173,23 +188,25 @@ export default function Contact() {
 
               <motion.button
                 type="submit"
-                disabled={status === 'loading'}
+                disabled={status === 'loading' || status === 'success'}
+                aria-live="polite"
                 whileTap={{ scale: 0.98 }}
+                aria-label="Send contact message"
                 style={{
                   padding: '0.8rem',
                   borderRadius: '8px',
                   border: 'none',
-                  background: 'var(--accent)',
+                  background: status === 'success' ? '#16a34a' : status === 'error' ? '#ef4444' : 'var(--accent)',
                   color: 'white',
                   fontSize: '0.9rem',
                   fontWeight: 600,
-                  cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                  cursor: status === 'loading' || status === 'success' ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.5rem',
                   opacity: status === 'loading' ? 0.7 : 1,
-                  transition: 'opacity 0.15s',
+                  transition: 'background 0.2s, opacity 0.15s',
                   fontFamily: 'inherit',
                 }}
               >
@@ -210,6 +227,12 @@ export default function Contact() {
                   <><Send size={15} /> Send Message</>
                 )}
               </motion.button>
+
+              {status === 'error' && errorMsg && (
+                <p role="alert" style={{ fontSize: '0.8rem', color: '#ef4444', margin: '0.25rem 0 0', textAlign: 'center' }}>
+                  {errorMsg}
+                </p>
+              )}
             </form>
           </motion.div>
         </div>

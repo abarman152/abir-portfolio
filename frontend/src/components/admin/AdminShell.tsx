@@ -64,7 +64,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   if (!mounted) return null;
 
-  const Sidebar = () => (
+  const sidebar = (
     <div style={{
       width: '240px', height: '100%',
       background: 'var(--bg-2)',
@@ -153,7 +153,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
       {/* Desktop sidebar */}
       <div className="hidden md:block" style={{ width: '240px', flexShrink: 0 }}>
-        <Sidebar />
+        {sidebar}
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -178,7 +178,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               className="md:hidden"
               style={{ position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 50 }}
             >
-              <Sidebar />
+              {sidebar}
             </motion.div>
           </>
         )}
@@ -195,12 +195,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         }}>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
           >
             {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
           <span style={{ fontWeight: 700, color: 'var(--text)' }}>Admin Panel</span>
-          <button onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)' }}>
+          <button onClick={toggleTheme} aria-label="Toggle theme" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)' }}>
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
         </div>
