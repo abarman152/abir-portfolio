@@ -1,8 +1,8 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
+import { sendContactNotifications } from '../lib/notifications';
 import prisma from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
-import { sendContactNotifications } from '../lib/notifications';
 
 const router = Router();
 
@@ -45,6 +45,7 @@ router.post('/', contactLimiter, async (req: Request, res: Response) => {
     // Fire notifications async — never blocks or fails the response
     setImmediate(() => {
       sendContactNotifications({
+        id: msg.id,
         name: msg.name,
         email: msg.email,
         subject: msg.subject,
@@ -53,7 +54,7 @@ router.post('/', contactLimiter, async (req: Request, res: Response) => {
       }).catch((err) => console.error('[contact] notification dispatch error:', err));
     });
 
-    res.status(201).json({ message: 'Message sent successfully', id: msg.id });
+    res.status(201).json({ success: true, message: 'Message sent successfully' });
   } catch (err) {
     console.error('[contact] POST error:', err);
     res.status(500).json({ error: 'Failed to send message. Please try again.' });
