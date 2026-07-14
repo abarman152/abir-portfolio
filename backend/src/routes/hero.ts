@@ -5,20 +5,27 @@ import { authenticate } from '../middleware/auth';
 const router = Router();
 
 router.get('/', async (_, res) => {
-  let hero = await prisma.heroContent.findFirst();
-  if (!hero) {
-    hero = await prisma.heroContent.create({
-      data: {
-        name: 'Abir Barman',
-        tagline: 'Data Scientist & Full Stack Developer',
-        roles: ['Data Scientist', 'ML Engineer', 'Full Stack Developer', 'Researcher'],
-        bio: 'Passionate about turning data into actionable insights and building scalable systems.',
-        resumeUrl: '',
-        avatarUrl: '',
-      },
-    });
+  try {
+    let hero = await prisma.heroContent.findFirst();
+    if (!hero) {
+      hero = await prisma.heroContent.create({
+        data: {
+          name: 'Abir Barman',
+          tagline: 'Data Scientist & Full Stack Developer',
+          roles: ['Data Scientist', 'ML Engineer', 'Full Stack Developer', 'Researcher'],
+          bio: 'Passionate about turning data into actionable insights and building scalable systems.',
+          resumeUrl: '',
+          avatarUrl: '',
+        },
+      });
+    }
+    res.json(hero);
+  } catch (error) {
+    // Surfaces the real cause (e.g. Prisma P2022/42703 column drift after a schema
+    // change that was not followed by `prisma db push`) instead of an opaque 500.
+    console.error('Hero GET error:', error);
+    res.status(500).json({ error: 'Failed to load hero content' });
   }
-  res.json(hero);
 });
 
 const isHttpUrl = (value: unknown): boolean => {
