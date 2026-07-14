@@ -92,13 +92,17 @@ export default function AdminSettings() {
     Promise.all([
       api.get<SiteSettings>('/settings', headers),
       api.get<HeroContent>('/hero', headers),
-    ]).then(([s, h]) => {
-      setSettings(s);
-      setHero(h);
-      if (s.heroConfig) {
-        setHeroConfig({ ...DEFAULT_HERO_CONFIG, ...s.heroConfig });
-      }
-    });
+    ])
+      .then(([s, h]) => {
+        setSettings(s);
+        setHero(h);
+        if (s.heroConfig) {
+          setHeroConfig({ ...DEFAULT_HERO_CONFIG, ...s.heroConfig });
+        }
+      })
+      .catch(() => {
+        setError('Failed to load settings from the server. Check that the backend is running and reachable, then refresh this page.');
+      });
   }, []);
 
   const resumeUrlInvalid = !!hero.resumeUrl && !isValidResumeUrl(hero.resumeUrl);
