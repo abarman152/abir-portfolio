@@ -1,5 +1,7 @@
 # Documentation Index
 
+> **Start at the root [`README.md`](../README.md)** — it is the canonical entry point and documentation portal for the whole repository (hero, project metrics, architecture diagrams, feature matrix, and the grouped documentation hub). This file is the detailed index it links into.
+
 This is the single source of truth for all **technical** documentation for the Abir Barman portfolio project. Project management (tasks, sprints, roadmap tracking, meeting notes) lives in Notion — see [`notion-vs-markdown.md`](./notion-vs-markdown.md) for the split.
 
 > **Status:** complete as of the 2026-07-03 documentation audit — every directory below is populated, all 896 internal links resolve, and all pre-existing content was corrected against the real codebase (see [`appendices/technical-debt-register.md`](./appendices/technical-debt-register.md)). See [`appendices/documentation-coverage-report.md`](./appendices/documentation-coverage-report.md) for the full coverage/quality scorecard and [`appendices/README.md`](./appendices/README.md) for all health reports.

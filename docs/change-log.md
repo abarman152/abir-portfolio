@@ -1,7 +1,34 @@
 # Audit Change Log
 
-**Version:** 1.1 · **Date:** 2026-07-13 · Branch: `antygravity-migration`
+**Version:** 1.2 · **Date:** 2026-07-14 · Branch: `antygravity-migration`
 Repository-level release history lives in [/CHANGELOG.md](../CHANGELOG.md); this file logs changes made by agent sessions.
+
+## 2026-07-14 — `GET /api/hero` 500 (schema drift) — diagnosis + hardening
+
+### Correction to the 2026-07-13 entry below
+That entry stated the `resumePreviewUrl` column would reach prod because "deploy runs it
+against prod." **This did not happen** — the production Supabase `HeroContent` table never
+got the column, so production `GET /api/hero` returns **500** (`42703 / column does not
+exist`) while `/api/settings` (no new column) stays 200. Tracked as **KI-10 / BUG-026**.
+
+### Backend
+- `src/routes/hero.ts` — wrapped `GET /` in `try/catch` with `console.error('Hero GET error:', error)` and a `500 { error: 'Failed to load hero content' }` response (mirrors `PUT`, satisfies AGENTS.md §4.2). Makes the real Prisma cause loggable at the route instead of an opaque "Internal server error".
+
+### Production action still required
+- Apply additive SQL in the Supabase SQL editor (non-destructive; **not** `prisma db push`, per §3.3 / TD-07):
+  ```sql
+  ALTER TABLE "HeroContent" ADD COLUMN IF NOT EXISTS "resumePreviewUrl" TEXT NOT NULL DEFAULT '';
+  ```
+
+### Documentation
+- `docs/debug/hero-api-500.md` — **new** full report (root cause, local vs prod, fix).
+- `docs/known-issues.md` — **KI-10** added. `docs/technical-debt.md` **TD-07** is the underlying deploy-pipeline debt.
+
+### Verified
+- Local: `tsc --noEmit` clean (BE); `curl :5002/api/hero` → 200 after hot-reload; drift trigger (`42703`) reproduced, confirming the new `catch` intercepts and logs it.
+- Prod: `curl https://api.abirbarman.com/api/hero` → 500 (open until the `ALTER TABLE` is applied); `/api/health` + `/api/settings` → 200.
+
+---
 
 ## 2026-07-13 — Resume Preview URL (independent embed source)
 
